@@ -13,7 +13,6 @@ docker exec -it pioneer bash
 https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
 
 
-
 # Pioneer Setup Summary
 ## 1. Github
 To allow collaboration on the pioneers and for ease of transfer of work between pioneers.  
