@@ -13,7 +13,8 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && mkdir /home/$USERNAME/.config && chown $USER_UID:$USER_GID /home/$USERNAME/.config
 
 RUN apt-get update \ 
-    && apt-get install -y net-tools
+    && apt-get install -y net-tools \
+    && apt-get install -y doxygen
 
 RUN apt-get update \
     && apt-get install -y sudo \
@@ -21,17 +22,28 @@ RUN apt-get update \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
     && rm -rf /var/lib/apt/lists/*
 
+RUN chmod 777 -R /dev/
 # Create ROS-Workspace
 
 RUN mkdir -p /home/$USERNAME/pioneer_ws/src
 
 WORKDIR /home/$USERNAME/pioneer_ws
 
-COPY src/pioneer_description src/pioneer_description
+COPY src src
+
+WORKDIR /home/$USERNAME/pioneer_ws/src/AriaCoda
+
+RUN make  \
+    && make install
+
+WORKDIR /home/$USERNAME/pioneer_ws
+
+ENV LD_LIBRARY_PATH ~/pioneer_ws/src/AriaCoda/lib
 
 RUN rosdep install -i --from-path src --rosdistro humble -y \
-    && colcon build --symlink-install \
-    && /bin/bash -c "source install/setup.bash"
+    && . /opt/ros/humble/setup.sh \
+    && colcon build \
+    && . install/setup.sh
 
 
 COPY entrypoint.sh /entrypoint.sh
