@@ -1,0 +1,16 @@
+version: '3'
+services:
+  pioneer:
+    build: .
+    image: pioneer:latest
+    restart: on-failure
+    container_name: pioneer
+    user: ros
+    volumes:
+      - $PWD/docker_shared:/docker_shared
+      - /dev:/dev
+    environment:
+      - DISPLAY
+    device_cgroup_rules:
+      - 'c 13:* rmw'
+    command: 'ros2 run demo_nodes_cpp listener'
