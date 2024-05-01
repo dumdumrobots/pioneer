@@ -1,12 +1,17 @@
 # Pioneer
 Pioneer Robot Repository for UWA Mobile Robots.
 
-
+# Docker
 To run the docker image
-''' sh
-docker image build -t pioneer .
-docker run -it --user ros --network=host --ipc=host -v $PWD/docker_shared:/docker_shared --env=DISPLAY pioneer
+''' bash
+docker compose build
+docker compose up -d
+docker exec -it pioneer bash
 '''
+
+### Devices major and minors listed in this file:
+https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
+
 
 # Pioneer Setup Summary
 ## 1. Github
@@ -15,7 +20,7 @@ To allow collaboration on the pioneers and for ease of transfer of work between 
 
 ## 2. Docker
 For ease of setup of pioneers each time we work on them.  
-- []  
+- [x]  
 
 ## 3. Initial ROS
 Pioneer is set up in the ROS environment, able to get a sim of the pioneer running.
@@ -23,7 +28,7 @@ Pioneer is set up in the ROS environment, able to get a sim of the pioneer runni
 
 ## 4. List out functionality and see if package exists
 - [] ARIA https://roblab.org/courses/mobrob/project/general/ariaNode.zip 
-- [] joy node: https://index.ros.org/p/joy/
+- [x] joy node: https://index.ros.org/p/joy/
 - [] teleop_twist_joy: https://index.ros.org/p/teleop_twist_joy/github-ros2-teleop_twist_joy/ 
 - [] Phidgets IMU node: http://wiki.ros.org/phidgets_imu (package may not work, use serial number for code on website to program directly)
 - [] Transforms broadcasters for the sensors: http://wiki.ros.org/tf
@@ -72,4 +77,3 @@ Show the robot's planned path graphically on a screen.
 
 ## 12. Record Drives for Offline Review
 Record drives for later review offline.
-
