@@ -3,7 +3,6 @@ services:
   pioneer:
     build: .
     image: pioneer:latest
-    restart: on-failure
     container_name: pioneer
     user: ros
     volumes:
@@ -12,5 +11,6 @@ services:
     environment:
       - DISPLAY
     device_cgroup_rules:
+      - 'c 188:0 rmw'
       - 'c 13:* rmw'
     command: 'ros2 run demo_nodes_cpp listener'
