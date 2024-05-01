@@ -1,6 +1,13 @@
 # Pioneer
 Pioneer Robot Repository for UWA Mobile Robots.
 
+
+To run the docker image
+''' sh
+docker image build -t pioneer .
+docker run -it --user ros --network=host --ipc=host -v $PWD/docker_shared:/docker_shared --env=DISPLAY pioneer
+'''
+
 # Pioneer Setup Summary
 ## 1. Github
 To allow collaboration on the pioneers and for ease of transfer of work between pioneers.  
@@ -65,3 +72,4 @@ Show the robot's planned path graphically on a screen.
 
 ## 12. Record Drives for Offline Review
 Record drives for later review offline.
+
