@@ -1,5 +1,31 @@
-# pioneer
+# Pioneer
 Pioneer Robot Repository for UWA Mobile Robots.
+
+# Pioneer Setup Summary
+## 1. Github
+To allow collaboration on the pioneers and for ease of transfer of work between pioneers.  
+- []
+
+## 2. Docker
+For ease of setup of pioneers each time we work on them.  
+- []  
+
+## 3. Initial ROS
+Pioneer is set up in the ROS environment, able to get a sim of the pioneer running.
+- []
+
+## 4. List out functionality and see if package exists
+- [] joy node: https://index.ros.org/p/joy/
+- [] teleop_twist_joy: https://index.ros.org/p/teleop_twist_joy/github-ros2-teleop_twist_joy/ 
+- [] Phidgets IMU node: http://wiki.ros.org/phidgets_imu (package may not work, use serial number for code on website to program directly)
+- [] Transforms broadcasters for the sensors: http://wiki.ros.org/tf
+- [] Nav stack setup: http://wiki.ros.org/navigation/Tutorials/RobotSetup
+- [] Lidar - Sick Scan xd https://www.sick.com/fr/en/tim781-2174101/p/p594148 (make sure to include transform)
+- [] Camera - DepthAI API: https://docs.luxonis.com/projects/sdk/en/latest/ Code Samples: https://docs.luxonis.com/projects/api/en/latest/tutorials/code_samples/
+
+## 5. Graph out the system with nodes, topics and message types
+
+## 6. Test Test Test
 
 # Task Summary
 
