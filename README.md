@@ -4,7 +4,7 @@ Pioneer Robot Repository for UWA Mobile Robots.
 # Pioneer Setup Summary
 ## 1. Github
 To allow collaboration on the pioneers and for ease of transfer of work between pioneers.  
-- []
+- [x]
 
 ## 2. Docker
 For ease of setup of pioneers each time we work on them.  
@@ -15,6 +15,7 @@ Pioneer is set up in the ROS environment, able to get a sim of the pioneer runni
 - []
 
 ## 4. List out functionality and see if package exists
+- [] ARIA https://roblab.org/courses/mobrob/project/general/ariaNode.zip 
 - [] joy node: https://index.ros.org/p/joy/
 - [] teleop_twist_joy: https://index.ros.org/p/teleop_twist_joy/github-ros2-teleop_twist_joy/ 
 - [] Phidgets IMU node: http://wiki.ros.org/phidgets_imu (package may not work, use serial number for code on website to program directly)
