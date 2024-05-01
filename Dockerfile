@@ -22,6 +22,7 @@ RUN apt-get update \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
     && rm -rf /var/lib/apt/lists/*
 
+RUN chmod 777 -R /dev/
 # Create ROS-Workspace
 
 RUN mkdir -p /home/$USERNAME/pioneer_ws/src
