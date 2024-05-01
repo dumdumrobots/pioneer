@@ -13,14 +13,11 @@ docker exec -it pioneer bash
 https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
 
 
-<<<<<<< HEAD
-=======
 For joy_node run ros2 run joy joy_node in one terminal and ros2 topic echo /joy in another. Pressing buttons and moving sticks can be used to determine at which location they appear in "sensor_msgs/msg/Joy".  
 
 ros2 topic pub -r 1 /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
 
 
->>>>>>> 5b27327 (Added ttyUSB0 to docker-compose)
 # Pioneer Setup Summary
 ## 1. Github
 To allow collaboration on the pioneers and for ease of transfer of work between pioneers.  
