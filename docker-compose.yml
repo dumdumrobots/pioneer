@@ -13,8 +13,9 @@ services:
     environment:
       - DISPLAY
     device_cgroup_rules:
-      - 'c 188:0 rmw'
-      - 'c 13:* rmw'
+      - 'c 188:* rw'
+      - 'c 189:* rw'
+      - 'c 13:* rw'
 
     stdin_open: true # docker run -i
     tty: true        # docker run -t
