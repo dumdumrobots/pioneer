@@ -44,6 +44,58 @@ Utilize Lidar sensor to prevent collisions with stationary objects within the en
 
 ## 5. Identify and Log Yellow or Red Obstacles
 Capture photos and note locations of yellow or red obstacles, as they are of special interest to the team.
+As we know that all of the red and yellow obstacles are red and yellow cones, the idea is to detect the shape of cones.
+If a cone is detected, determine the colour of the cone.
+
+What we could do:
+During the exploration of the unknown environment:
+1. While driving around and mapping, check if there is a cone.
+2. If there is a cone, drive the robot to the cone and stop in e.g. 20cm distance.
+3. Determine the colour of the cone (either red or yellow).
+4. Calculate the location of the cone in the real world.
+5. Save the location of the cone.
+
+### Detect the cones:
+#### Var 1: SIFT/ORB:
+SIFT
+https://docs.opencv.org/4.x/da/df5/tutorial_py_sift_intro.html
+
+FAST
+https://docs.opencv.org/4.x/df/d0c/tutorial_py_fast.html
+
+ORB
+https://www.geeksforgeeks.org/feature-detection-and-matching-with-opencv-python/?ref=lbp
+
+I tried a mix of the code of
+https://www.geeksforgeeks.org/feature-matching-using-orb-algorithm-in-python-opencv/?ref=lbp
+and
+https://docs.opencv.org/4.x/dc/dc3/tutorial_py_matcher.html
+
+It works well with the Harry Potter book (*ConeDetection/ORB/detectHarryPotter.py*).
+
+Sadly, detecting the cones (*ConeDetection/ORB/detect_Cone.py*) did not succeed.
+
+![Keypoints Harry Potter](ConeDetection/ORB/results/HarryPotterKeypoints.png)
+![Detect Yellow Colour](ConeDetection/ORB/results/HarryPotterDetect.png)
+![Cone Key Points](ConeDetection/ORB/results/ConeKeyPoints.png)
+![Cone Matches Similar](ConeDetection/ORB/results/ConeMatches1.png)
+![Cone Matches Many House](ConeDetection/ORB/results/ConeMatches2.png)
+
+#### Var 2: Yolo
+
+### Detect the colour:
+The RGB Image is converted to an HSV Image.
+The lower bound of red is [160,50,50] and the upper bound is [180,255,255].
+The script *detectColour/detectRedColourVideo.py* detects red areas in the webcam video if they are bigger than a threshold (this threshold must be adapted for the smaller 28x28 image).
+
+The lower bound of yellow is [20,100,100] and the upper bound is [[30,255,255].
+The script *ConeDetection/detectColour/detectYellowColourVideo.py* detects yellow areas if they are bigger than a threshold.
+
+The website https://cvexplained.wordpress.com/2020/04/28/color-detection-hsv/ also provides code for capturing an object in real time using cv2.resize.
+Do we need that if we only have 28x28 pixels?
+
+![Detect Red Colour](ConeDetection/detectColour/results/detectRedColour.png)
+![Detect Yellow Colour](ConeDetection/detectColour/results/detectYellowColour.png)
 
 ## 6. Avoid Collision with Moving Obstacles
 Implement collision avoidance with moving obstacles, triggering an emergency stop if an object comes within 1m of the robot.
