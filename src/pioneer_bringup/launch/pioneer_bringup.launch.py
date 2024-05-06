@@ -42,12 +42,22 @@ def generate_launch_description():
             get_package_share_directory('pioneer_teleop'), 
             'launch'),'/teleop.launch.py']),
             )
-            
+    
+    camera_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('depthai_ros_driver'), 
+            'launch'),'/camera.launch.py']),
 
+            launch_arguments={
+                'use_rviz': 'false',
+                }.items(),
+            )
+        
 
     return LaunchDescription([
         imu_launch,
-        teleop_launch
+        teleop_launch,
         lidar_node,
         aria_node,
+        camera_launch,
     ])
