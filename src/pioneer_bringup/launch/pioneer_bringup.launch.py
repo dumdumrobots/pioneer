@@ -35,10 +35,19 @@ def generate_launch_description():
             get_package_share_directory('phidgets_spatial'), 
             'launch'),'/spatial-launch.py']),
             )
+    
+
+    teleop_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('pioneer_teleop'), 
+            'launch'),'/teleop.launch.py']),
+            )
+            
 
 
     return LaunchDescription([
         imu_launch,
+        teleop_launch
         lidar_node,
         aria_node,
     ])
