@@ -14,6 +14,7 @@ RUN apt-get update \
     && apt-get install -y doxygen \
     && apt-get install -y sudo \
     && apt-get install -y ros-humble-sick-scan-xd \ 
+    && apt-get install -y ros-humble-phidgets-drivers \
     && rm -rf /var/lib/apt/lists/* \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME\
     && chmod 0440 /etc/sudoers.d/$USERNAME 
@@ -43,7 +44,7 @@ RUN rosdep install -i --from-path src --rosdistro humble -y \
 COPY entrypoint.sh /entrypoint.sh
 COPY bashrc /home/${USERNAME}/.bashrc
 
-ENV ROS_DOMAIN_ID=101
+ENV ROS_DOMAIN_ID=24
 
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
 

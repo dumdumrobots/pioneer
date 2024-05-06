@@ -28,10 +28,17 @@ def generate_launch_description():
         name='aria_node',
         arguments=['-rp', '/dev/ttyUSB0']
         )
-
     
 
+    imu_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('phidgets_spatial'), 
+            'launch'),'/spatial-launch.py']),
+            )
+
+
     return LaunchDescription([
+        imu_launch,
         lidar_node,
         aria_node,
     ])

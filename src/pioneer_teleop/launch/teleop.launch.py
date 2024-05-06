@@ -32,16 +32,7 @@ def generate_launch_description():
             )
 
 
-    
-    aria_node = Node(package='aria_bringup', 
-                        executable='aria_bringup',
-                        name='aria_node',
-                        arguments=['-rp', '/dev/ttyUSB0'])
-
-    
-
     return LaunchDescription([
         teleop_twist_joy,
-        aria_node,
     ])
 
