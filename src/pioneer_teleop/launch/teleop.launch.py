@@ -19,23 +19,26 @@ def generate_launch_description():
         'config',
         'ps4.config.yaml'
         )
-        
+
     teleop_twist_joy = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory('teleop_twist_joy'), 'launch','teleop-launch.py')
-            ),
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('teleop_twist_joy'), 
+            'launch'),'/teleop-launch.py']),
 
             launch_arguments={
                 'joy_config': 'ps4', 
-                'config_filepath' : config
-                }.items()
+                'config_filepath' : config,
+                }.items(),
             )
 
+
+    
     aria_node = Node(package='aria_bringup', 
                         executable='aria_bringup',
                         name='aria_node',
-                        arguments=['-rp', '/dev/ttyUSB0']),
-                        
+                        arguments=['-rp', '/dev/ttyUSB0'])
+
+    
 
     return LaunchDescription([
         teleop_twist_joy,
