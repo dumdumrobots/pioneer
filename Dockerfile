@@ -13,6 +13,7 @@ RUN apt-get update \
     && apt-get install -y net-tools \
     && apt-get install -y doxygen \
     && apt-get install -y sudo \
+    && apt-get install -y ros-humble-sick-scan-xd \ 
     && rm -rf /var/lib/apt/lists/* \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME\
     && chmod 0440 /etc/sudoers.d/$USERNAME 
