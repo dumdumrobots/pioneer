@@ -18,9 +18,9 @@ while(1):
     useThresholdVar = 1
     # useThresholdVar = 2
     if useThresholdVar == 1:
-        lower_red = np.array([20,100,100])
-        upper_red = np.array([30,255,255])
-        mask = cv2.inRange(hsv, lower_red, upper_red)  
+        lower_yellow = np.array([20,100,100])
+        upper_yellow = np.array([30,255,255])
+        mask = cv2.inRange(hsv, lower_yellow, upper_yellow)  
     
     # if useThresholdVar == 2:
     #     # lower boundary RED color range values; Hue (0 - 10)

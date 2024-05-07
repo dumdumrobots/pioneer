@@ -82,9 +82,54 @@ Sadly, detecting the cones (*ConeDetection/ORB/detect_Cone.py*) did not succeed.
 ![Cone Matches Many House](ConeDetection/ORB/results/ConeMatches2.png)
 
 #### Var 2: Yolo
+The code is based on https://github.com/jhan15/traffic_cones_detection/tree/master/images.
+
+1. clone yolov5
+```console
+git clone https://github.com/ultralytics/yolov5  # 
+cd yolov5
+git reset --hard 886f1c03d839575afecb059accf74296fad395b6
+```
+
+2. install dependencies
+```console
+pip install -qr requirements.txt
+```
+
+3. clone https://github.com/jhan15/traffic_cones_detection/tree/master/images to another *directory2*
+
+4. copy *model/best.pt* from *directory2* to the 1st repo in *yolov5/weights*
+
+5. copy *utils/best.pt* from *directory2* to the 1st repo in *yolov5*
+
+6. copy *utils/best.pt* from *directory2* to the 1st repo in *yolov5/utils*
+
+7. Detect the cones in the pictures. Replace the last path with the path to the image.
+```console
+python detect.py --weights weights/best.pt --conf 0.6 --source C:\Users\49162\Documents\Uni\Master5_24_SS\MobileRobots\Project\pioneer\ConeDetection\ORB\Cones\queryCones
+```
+So far, *detect.py* shows the image with boxes around the cones, prints out how many cones are detected as well as the coordinates of the centres of the cones.
+
+8. The images with boxes around the cones are saved to *runs\detect\exp*
+
+**Results**
+- Fallen cones are not detected.
+- The cones that are not fallen are most of the times detected. But some of them are detected as yellow cones although they are red and some of the yellow cones are detected as green cones. --> check the colour again in a second step using the HSV value
+![yolov5 result1](ConeDetection\yolov5\results\IMG_20240503_154802308.jpg)
+![yolov5 result 2](ConeDetection\yolov5\results\IMG_20240503_154849515.jpg)
+![yolov5 result 3](ConeDetection\yolov5\results\IMG_20240503_155145312.jpg)
+
+**To do/Questions**
+- Test the code with the robot's camera.
+- Ask if there are fallen cones.
+- Will there be fallen cones?
+- Is the detection fast enough?
 
 ### Detect the colour:
+**Goal**: Given a the coordinates of a detected cone, decide if the cone is red or yellow.
+
 The RGB Image is converted to an HSV Image.
+Watch out, different applications use different scales for HSV. OpenCV uses H: 0-179, S: 0-255, V: 0-255.
 The lower bound of red is [160,50,50] and the upper bound is [180,255,255].
 The script *detectColour/detectRedColourVideo.py* detects red areas in the webcam video if they are bigger than a threshold (this threshold must be adapted for the smaller 28x28 image).
 
@@ -96,6 +141,22 @@ Do we need that if we only have 28x28 pixels?
 
 ![Detect Red Colour](ConeDetection/detectColour/results/detectRedColour.png)
 ![Detect Yellow Colour](ConeDetection/detectColour/results/detectYellowColour.png)
+
+The script *detectColour/detectRedColourImage.py* detects red colour of all the images located in a folder. All red cones are detected as red, no yellow cone is detect as red (successfull). But also the soil is detected as red sometimes.
+![Detect Red Colour 1](ConeDetection/detectColour/results/detectRed1.jpg)
+![Detect Red Colour 2](ConeDetection/detectColour/results/detectRed2.jpg)
+This is why the script *detectColour/identifyHSV.py* is used to check the colour of the red cones that are rather orange than red. Run the script and double click on all the points where you want to know the HSV value. The new colour ranges are determined to [0,125,225] and [7,240,255] and show gut results. But probably they must be changed again in the future if there is different light or shadows.
+![Detect Red Colour 1](ConeDetection/detectColour/results/detectRed3.jpg)
+![Detect Red Colour 2](ConeDetection/detectColour/results/detectRed4.jpg)
+
+The script *detectColour/detectYellowColourImage.py* detects yellow colour of all the images located in a folder. Some red cones are detected as yellow (not successfull). Maybe this is not too bad if we first check if the colour is red and only check for yellow colour in case no red colour was detected. Otherwise the HSV values must be adapted.
+![Detect Yellow Colour 1](ConeDetection/detectColour/results/detectYellow1.jpg)
+Also, the script *detectColour/detectRedColourImage.py* is used to identify the specific yellow colour ranges in the images. The new range is [20,190,210] to [30,255,255] and seems to be more reliable but it also needs to be checked with different light.
+![Detect Yellow Colour 2](ConeDetection/detectColour/results/detectYellow2.jpg)
+
+
+The website https://pinetools.com/image-color-picker offers the opportunity to upload an image and check the HSV values.
+
 
 ## 6. Avoid Collision with Moving Obstacles
 Implement collision avoidance with moving obstacles, triggering an emergency stop if an object comes within 1m of the robot.
