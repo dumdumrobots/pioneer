@@ -115,9 +115,9 @@ So far, *detect.py* shows the image with boxes around the cones, prints out how 
 **Results**
 - Fallen cones are not detected.
 - The cones that are not fallen are most of the times detected. But some of them are detected as yellow cones although they are red and some of the yellow cones are detected as green cones. --> check the colour again in a second step using the HSV value
-![yolov5 result1](ConeDetection\yolov5\results\IMG_20240503_154802308.jpg)
-![yolov5 result 2](ConeDetection\yolov5\results\IMG_20240503_154849515.jpg)
-![yolov5 result 3](ConeDetection\yolov5\results\IMG_20240503_155145312.jpg)
+![yolov5 result1](ConeDetection/yolov5/results/IMG_20240503_154802308.jpg)
+![yolov5 result 2](ConeDetection/yolov5/results/IMG_20240503_154849515.jpg)
+![yolov5 result 3](ConeDetection/yolov5/results/IMG_20240503_155145312.jpg)
 
 **To do/Questions**
 - Test the code with the robot's camera.
