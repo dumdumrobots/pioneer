@@ -122,7 +122,7 @@ So far, *detect.py* shows the image with boxes around the cones, prints out how 
 **To do/Questions**
 - Test the code with the robot's camera.
 - Ask if there are fallen cones.
-- Will there be fallen cones?
+- Ask if there will be any other cones apart from the rather orange one and the yellow-green one.
 - Is the detection fast enough?
 
 ### Detect the colour:
@@ -153,9 +153,6 @@ The script *detectColour/detectYellowColourImage.py* detects yellow colour of al
 ![Detect Yellow Colour 1](ConeDetection/detectColour/results/detectYellow1.jpg)
 Also, the script *detectColour/detectRedColourImage.py* is used to identify the specific yellow colour ranges in the images. The new range is [20,190,210] to [30,255,255] and seems to be more reliable but it also needs to be checked with different light.
 ![Detect Yellow Colour 2](ConeDetection/detectColour/results/detectYellow2.jpg)
-
-
-The website https://pinetools.com/image-color-picker offers the opportunity to upload an image and check the HSV values.
 
 
 ## 6. Avoid Collision with Moving Obstacles
