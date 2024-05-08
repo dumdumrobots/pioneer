@@ -1,6 +1,32 @@
 # Pioneer
 Pioneer Robot Repository for UWA Mobile Robots.
 
+# Github
+## Updating your branch to master
+From a up to date branch
+'''bash
+git checkout master
+git pull
+git checkout <branch>
+git rebase master
+git pull
+'''
+
+## Merging your branch with master
+'''bash
+git add .
+git commit -m '<message>'
+git push
+'''
+[On the github](https://github.com/dumdumrobots/pioneer)
+Pull requests tab
+new pull request
+base: master
+compare: <branch>
+create pull request
+Deal with conflicts then merge pull request
+
+
 # Docker
 To run the docker image
 ''' bash
@@ -29,17 +55,17 @@ For ease of setup of pioneers each time we work on them.
 
 ## 3. Initial ROS
 Pioneer is set up in the ROS environment, able to get a sim of the pioneer running.
-- []
+- [x]
 
 ## 4. List out functionality and see if package exists
-- [] ARIA https://roblab.org/courses/mobrob/project/general/ariaNode.zip 
+- [x] ARIA https://roblab.org/courses/mobrob/project/general/ariaNode.zip 
 - [x] joy node: https://index.ros.org/p/joy/
-- [] teleop_twist_joy: https://index.ros.org/p/teleop_twist_joy/github-ros2-teleop_twist_joy/ 
+- [x] teleop_twist_joy: https://index.ros.org/p/teleop_twist_joy/github-ros2-teleop_twist_joy/ 
 - [] Phidgets IMU node: http://wiki.ros.org/phidgets_imu (package may not work, use serial number for code on website to program directly)
 - [] Transforms broadcasters for the sensors: http://wiki.ros.org/tf
 - [] Nav stack setup: http://wiki.ros.org/navigation/Tutorials/RobotSetup
-- [] Lidar - Sick Scan xd https://www.sick.com/fr/en/tim781-2174101/p/p594148 (make sure to include transform)
-- [] Camera - DepthAI API: https://docs.luxonis.com/projects/sdk/en/latest/ Code Samples: https://docs.luxonis.com/projects/api/en/latest/tutorials/code_samples/
+- [x] Lidar - Sick Scan xd https://www.sick.com/fr/en/tim781-2174101/p/p594148 (make sure to include transform)
+- [x] Camera - DepthAI API: https://docs.luxonis.com/projects/sdk/en/latest/ Code Samples: https://docs.luxonis.com/projects/api/en/latest/tutorials/code_samples/
 
 ## 5. Graph out the system with nodes, topics and message types
 
