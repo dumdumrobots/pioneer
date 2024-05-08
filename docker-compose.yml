@@ -1,9 +1,11 @@
-version: '3'
+
 services:
   pioneer:
     build: .
     image: pioneer:latest
     container_name: pioneer
+    network_mode: "host"
+
     user: ros
     volumes:
       - $PWD/docker_shared:/docker_shared
@@ -11,6 +13,9 @@ services:
     environment:
       - DISPLAY
     device_cgroup_rules:
-      - 'c 188:0 rmw'
-      - 'c 13:* rmw'
-    command: 'ros2 run demo_nodes_cpp listener'
+      - 'c 188:* rw'
+      - 'c 189:* rw'
+      - 'c 13:* rw'
+
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
