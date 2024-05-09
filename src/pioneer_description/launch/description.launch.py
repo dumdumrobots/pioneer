@@ -42,10 +42,6 @@ def generate_launch_description():
         executable='rviz2',
         arguments=['-d', os.path.join(description_pkg, 'rviz', 'pioneer.rviz')],
         condition=IfCondition(LaunchConfiguration('rviz')),
-
-        #parameters=[
-        #    {'use_sim_time': True},
-        #]
     )
 
     joint_state_pub = Node(
@@ -53,9 +49,17 @@ def generate_launch_description():
         executable='joint_state_publisher'
     )
 
+    camera_tf_pub = Node(package='tf2_ros',
+                         executable='static_transform_publisher',
+                         name='base_fp_linkTF',
+                         output='log', 
+                         arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0',  'cam_link', 'oak'])
+    
+
     return LaunchDescription([
         rviz_launch_arg,
         robot_state_publisher,
         joint_state_pub,
+        camera_tf_pub 
         rviz,
     ])

@@ -616,11 +616,11 @@
 
   <joint name="cam_joint" type="fixed">
     <parent link="chassis" />
-    <child link="oak" />
+    <child link="cam_link" />
     <origin xyz="0.24 0 0.084" rpy="0 0 0"/>
   </joint>
 
-  <link name="oak">
+  <link name="cam_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/> 
       <geometry>
@@ -633,18 +633,18 @@
   </link>
 
   <joint name="cam_optical_joint" type="fixed">
-    <parent link="oak" />
+    <parent link="cam_link" />
     <child link="cam_optical_link" />
     <origin xyz="0.3 0 0.2" rpy="-1.65 0 -1.65"/>
   </joint>
 
   <link name="cam_optical_link"></link>
 
-  <gazebo reference="oak">
+  <gazebo reference="cam_link">
     <material>Gazebo/Blue</material>
     <sensor name='camera' type='camera'>"
-    <ignition_frame_id>oak</ignition_frame_id>
-      <pose relative_to='oak'>0 0 0 0 0 0</pose>
+    <ignition_frame_id>cam_link</ignition_frame_id>
+      <pose relative_to='cam_link'>0 0 0 0 0 0</pose>
       <always_on>1</always_on>
       <visualize>true</visualize>
       <topic>camera</topic>
