@@ -14,7 +14,7 @@ from launch.substitutions import PathJoinSubstitution, TextSubstitution
 def generate_launch_description():
 
     pioneer_pkg = get_package_share_directory('pioneer_bringup')
-    robot_localization_file_path = os.path.join(pioneer_pkg, 'config/ekf.yaml')
+    robot_localization_file_path = os.path.join(pioneer_pkg, 'config/ekf_int.yaml')
 
 
     lidar_node = Node(
