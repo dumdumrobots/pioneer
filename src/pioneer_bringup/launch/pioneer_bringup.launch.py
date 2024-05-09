@@ -39,6 +39,13 @@ def generate_launch_description():
         output='screen',
         parameters=[robot_localization_file_path])
     
+    int_odom_node = Node(
+        package='pioneer_bringup',
+        executable='int_odom',
+        name='int_odom_node',
+        output='screen',
+    )
+    
 
     imu_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
@@ -69,6 +76,7 @@ def generate_launch_description():
         imu_launch,
         teleop_launch,
         #camera_launch,
+        int_odom_node,
         lidar_node,
         aria_node,
         ekf_node,
