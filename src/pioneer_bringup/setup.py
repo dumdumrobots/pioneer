@@ -30,6 +30,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'rough_odom_pub = pioneer_bringup.rough_odom_pub:main',
         ],
     },
 )
