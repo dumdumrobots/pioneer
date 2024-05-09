@@ -13,6 +13,9 @@ from launch.substitutions import PathJoinSubstitution, TextSubstitution
 
 def generate_launch_description():
 
+    pioneer_pkg = get_package_share_directory('pioneer_bringup')
+    robot_localization_file_path = os.path.join(pioneer_pkg, 'config/ekf.yaml')
+
 
     lidar_node = Node(
         package='sick_scan_xd',
@@ -28,6 +31,13 @@ def generate_launch_description():
         name='aria_node',
         arguments=['-rp', '/dev/ttyUSB0']
         )
+
+    ekf_node = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[robot_localization_file_path])
     
 
     imu_launch = IncludeLaunchDescription(
@@ -57,7 +67,8 @@ def generate_launch_description():
     return LaunchDescription([
         imu_launch,
         teleop_launch,
+        camera_launch,
         lidar_node,
         aria_node,
-        camera_launch,
+        ekf_node,
     ])
