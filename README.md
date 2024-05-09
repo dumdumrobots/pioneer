@@ -125,6 +125,31 @@ So far, *detect.py* shows the image with boxes around the cones, prints out how 
 - Ask if there will be any other cones apart from the rather orange one and the yellow-green one.
 - Is the detection fast enough?
 
+### Train a model with yolov5
+good overview https://blog.paperspace.com/train-yolov5-custom-data/
+- how to label the pictures: https://roboflow.com/formats/yolov5-pytorch-txt
+Each image has one txt file with a single line for each bounding box. The format of each row is
+
+class_id center_x center_y width height
+
+where fields are space delimited, and the coordinates are normalized from zero to one.
+
+Note: To convert to normalized xywh from pixel values, divide x (and width) by the image's width and divide y (and height) by the image's height.
+
+- preprocessing of the images:
+1. Auto-orient the images.
+
+https://blog.roboflow.com/exif-auto-orientation/
+
+How to do that? Is it necessary when using the robot's camera where we do not rotate the camera?
+
+2. resize to 416x416
+
+3. The following augmentation was applied to create 3 versions of each source image:
+* Random rotation of between -15 and +15 degrees
+* Random shear of between -10° to +10° horizontally and -10° to +10° vertically
+
+
 ### Detect the colour:
 **Goal**: Given a the coordinates of a detected cone, decide if the cone is red or yellow.
 
