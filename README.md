@@ -115,14 +115,15 @@ So far, *detect.py* shows the image with boxes around the cones, prints out how 
 **Results**
 - Fallen cones are not detected.
 - The cones that are not fallen are most of the times detected. But some of them are detected as yellow cones although they are red and some of the yellow cones are detected as green cones. --> check the colour again in a second step using the HSV value
+- The tall cones are detected also as cones.
 ![yolov5 result1](ConeDetection/yolov5/results/IMG_20240503_154802308.jpg)
 ![yolov5 result 2](ConeDetection/yolov5/results/IMG_20240503_154849515.jpg)
 ![yolov5 result 3](ConeDetection/yolov5/results/IMG_20240503_155145312.jpg)
 
 **To do/Questions**
 - Test the code with the robot's camera.
-- Ask if there are fallen cones.
-- Ask if there will be any other cones apart from the rather orange one and the yellow-green one.
+- Ask if there are fallen cones --> yes
+- Ask if there will be any other cones apart from the rather orange one and the yellow-green one --> yes: the orange tall cone and the red big bin
 - Is the detection fast enough?
 
 ### Train a model with yolov5
@@ -149,6 +150,7 @@ How to do that? Is it necessary when using the robot's camera where we do not ro
 * Random rotation of between -15 and +15 degrees
 * Random shear of between -10° to +10° horizontally and -10° to +10° vertically
 
+Problem: crashes on windows, on linux not enough space.
 
 ### Detect the colour:
 **Goal**: Given a the coordinates of a detected cone, decide if the cone is red or yellow.

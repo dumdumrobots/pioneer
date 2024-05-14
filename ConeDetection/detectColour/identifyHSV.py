@@ -5,7 +5,7 @@ def coords_mouse_disp(event,x,y,flags,param):
          #print("Orginal BGR:",img[y,x])
          print("HSV values:", HSV[y,x])
 
-path = "queryCones\IMG_20240503_155111734.jpg"
+path = "queryCones\IMG_20240503_154832333.jpg"
 while True:
     img = cv2.imread(path)
     img = cv2.resize(img, None, fx=0.2, fy=0.2)
