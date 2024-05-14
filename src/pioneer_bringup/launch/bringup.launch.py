@@ -47,13 +47,6 @@ def generate_launch_description():
                 {'publish_tf': False}
             ]
     )
-
-    slam_node = Node(
-        package='slam_toolbox',
-        executable='async_slam_toolbox_node',
-        parameters=[pioneer_pkg + '/config/mapping.yaml'],
-        output='screen',
-    )
     
 
     imu_launch = IncludeLaunchDescription(
@@ -79,19 +72,11 @@ def generate_launch_description():
                 }.items(),
             )
     
-    nav_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('nav2_bringup'), 
-            'launch'),'/navigation_launch.py']),
-            )
-    
 
     return LaunchDescription([
         imu_launch,
         teleop_launch,
         #camera_launch,
-        nav_launch,
-        slam_node,
         int_odom_node,
         lidar_node,
         aria_node,
