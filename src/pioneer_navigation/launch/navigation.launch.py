@@ -23,13 +23,6 @@ def generate_launch_description():
         output='screen',
     )
     
-
-    teleop_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('pioneer_teleop'), 
-            'launch'),'/teleop.launch.py']),
-            )
-    
     nav_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('nav2_bringup'), 
@@ -38,7 +31,6 @@ def generate_launch_description():
     
 
     return LaunchDescription([
-        teleop_launch,
-        nav_launch,
         slam_node,
+        nav_launch,
     ])
