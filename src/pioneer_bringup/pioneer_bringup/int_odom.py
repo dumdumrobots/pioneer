@@ -61,13 +61,22 @@ class RoughOdometry(Node):
 
         delta = (self.curret_time - self.last_time) * 1e-9
 
-        vx = twist_msg.linear.x
-        vy = twist_msg.linear.y
-        w = twist_msg.angular.z
+        vx_R = twist_msg.linear.x
+        w_R = twist_msg.angular.z
 
-        self.x += vx * delta
-        self.y += vy * delta
-        self.theta += w * delta
+        self.theta += w_R * delta
+
+        v_R = np.array([[vx_R],
+                        [0]])
+
+        R_iR = np.array([[np.cos(self.theta), -np.sin(self.theta)],
+                         [np.sin(self.theta),  np.cos(self.theta)]])
+        
+        v_i = np.dot(R_iR, v_R)
+
+        self.x += v_i[0,0] * delta
+        self.y += v_i[1,0] * delta
+        
 
         odom = Odometry()
         odom.header.stamp = self.get_clock().now().to_msg()
@@ -83,7 +92,10 @@ class RoughOdometry(Node):
         odom.pose.pose.orientation.z = self.q[2]
         odom.pose.pose.orientation.w = self.q[3]
 
-        odom.twist.twist = twist_msg
+        odom.twist.twist.linear.x = v_i[0,0]
+        odom.twist.twist.linear.x = v_i[1,0]
+
+        odom.twist.twist.angular.z = w_R
 
         self.odom_pub.publish(odom)
         self.last_time = self.curret_time

@@ -14,7 +14,7 @@ from launch.substitutions import PathJoinSubstitution, TextSubstitution
 def generate_launch_description():
 
     pioneer_pkg = get_package_share_directory('pioneer_bringup')
-    robot_localization_file_path = os.path.join(pioneer_pkg, 'config/ekf_int.yaml')
+    robot_localization_file_path = os.path.join(pioneer_pkg, 'config/ekf.yaml')
 
 
     lidar_node = Node(
@@ -60,7 +60,6 @@ def generate_launch_description():
             'launch'),'/teleop.launch.py']),
             )
     
-    '''
     camera_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('depthai_ros_driver'), 
@@ -70,7 +69,7 @@ def generate_launch_description():
                 'use_rviz': 'false',
                 }.items(),
             )
-    '''
+    
 
     return LaunchDescription([
         imu_launch,
@@ -79,5 +78,5 @@ def generate_launch_description():
         int_odom_node,
         lidar_node,
         aria_node,
-        ekf_node,
+        #ekf_node,
     ])
