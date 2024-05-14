@@ -42,10 +42,6 @@ def generate_launch_description():
         executable='rviz2',
         arguments=['-d', os.path.join(description_pkg, 'rviz', 'pioneer.rviz')],
         condition=IfCondition(LaunchConfiguration('rviz')),
-
-        #parameters=[
-        #    {'use_sim_time': True},
-        #]
     )
 
     joint_state_pub = Node(

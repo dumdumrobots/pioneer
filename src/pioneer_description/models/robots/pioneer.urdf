@@ -10,8 +10,19 @@
     <origin xyz="0.0 0.0 0.010" rpy="0 0 0"/>
       
   </joint>
-  
+
   <link name="base_link"/>
+
+  <!-- IMU -->
+
+  <link name="imu_link"/>
+
+   <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0.24 0 0.271" rpy="0 0 0"/>
+      
+  </joint>
 
   <!-- Chassis -->
   <link name="chassis">
@@ -539,11 +550,11 @@
 
   <joint name="laser_joint" type="fixed">
     <parent link="chassis" />
-    <child link="laser_frame" />
+    <child link="cloud" />
     <origin xyz="0.2 0 0.104" rpy="0 0 0"/>
   </joint>
 
-  <link name="laser_frame">
+  <link name="cloud">
    <collision>
      <origin xyz="0 0 0" rpy="0 0 0"/>
      <geometry>
@@ -605,11 +616,11 @@
 
   <joint name="cam_joint" type="fixed">
     <parent link="chassis" />
-    <child link="cam_frame" />
+    <child link="cam_link" />
     <origin xyz="0.24 0 0.084" rpy="0 0 0"/>
   </joint>
 
-  <link name="cam_frame">
+  <link name="cam_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/> 
       <geometry>
@@ -622,18 +633,18 @@
   </link>
 
   <joint name="cam_optical_joint" type="fixed">
-    <parent link="cam_frame" />
+    <parent link="cam_link" />
     <child link="cam_optical_link" />
     <origin xyz="0.3 0 0.2" rpy="-1.65 0 -1.65"/>
   </joint>
 
   <link name="cam_optical_link"></link>
 
-  <gazebo reference="cam_frame">
+  <gazebo reference="cam_link">
     <material>Gazebo/Blue</material>
     <sensor name='camera' type='camera'>"
-    <ignition_frame_id>cam_frame</ignition_frame_id>
-      <pose relative_to='cam_frame'>0 0 0 0 0 0</pose>
+    <ignition_frame_id>cam_link</ignition_frame_id>
+      <pose relative_to='cam_link'>0 0 0 0 0 0</pose>
       <always_on>1</always_on>
       <visualize>true</visualize>
       <topic>camera</topic>

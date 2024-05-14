@@ -1,10 +1,9 @@
 import os
 from glob import glob
 from setuptools import setup
-
 from setuptools import find_packages, setup
 
-package_name = 'pioneer_bringup'
+package_name = 'pioneer_navigation'
 
 setup(
     name=package_name,
@@ -26,11 +25,10 @@ setup(
     maintainer='joacorn',
     maintainer_email='joaquin.cornejo@utec.edu.pe',
     description='TODO: Package description',
-    license='Apache-2.0',
+    license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'int_odom = pioneer_bringup.int_odom:main',
         ],
     },
 )

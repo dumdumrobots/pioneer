@@ -13,6 +13,9 @@ from launch.substitutions import PathJoinSubstitution, TextSubstitution
 
 def generate_launch_description():
 
+    pioneer_pkg = get_package_share_directory('pioneer_bringup')
+    robot_localization_file_path = os.path.join(pioneer_pkg, 'config/ekf.yaml')
+
 
     lidar_node = Node(
         package='sick_scan_xd',
@@ -21,13 +24,29 @@ def generate_launch_description():
         arguments=['/opt/ros/humble/share/sick_scan_xd/launch/sick_tim_7xx.launch']
         )
     
-    
     aria_node = Node(
         package='aria_bringup', 
         executable='aria_bringup',
         name='aria_node',
         arguments=['-rp', '/dev/ttyUSB0']
         )
+
+    ekf_node = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[robot_localization_file_path])
+    
+    int_odom_node = Node(
+        package='pioneer_bringup',
+        executable='int_odom',
+        name='int_odom_node',
+        output='screen',
+        parameters=[
+                {'publish_tf': True}
+            ]
+    )
     
 
     imu_launch = IncludeLaunchDescription(
@@ -52,12 +71,14 @@ def generate_launch_description():
                 'use_rviz': 'false',
                 }.items(),
             )
-        
+    
 
     return LaunchDescription([
         imu_launch,
         teleop_launch,
+        #camera_launch,
+        int_odom_node,
         lidar_node,
         aria_node,
-        camera_launch,
+        #ekf_node,
     ])
