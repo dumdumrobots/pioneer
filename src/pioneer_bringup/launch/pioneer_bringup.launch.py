@@ -82,7 +82,7 @@ def generate_launch_description():
         imu_launch,
         teleop_launch,
         #camera_launch,
-        slam_node,
+        #slam_node,
         int_odom_node,
         lidar_node,
         aria_node,
