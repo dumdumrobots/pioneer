@@ -77,12 +77,19 @@ def generate_launch_description():
                 }.items(),
             )
     
+    nav_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('nav2_bringup'), 
+            'launch'),'/navigation_launch.py']),
+            )
+    
 
     return LaunchDescription([
         imu_launch,
         teleop_launch,
         #camera_launch,
-        #slam_node,
+        nav_launch,
+        slam_node,
         int_odom_node,
         lidar_node,
         aria_node,

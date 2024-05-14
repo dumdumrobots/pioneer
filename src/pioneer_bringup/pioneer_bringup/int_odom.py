@@ -15,6 +15,8 @@ class IntegralOdometry(Node):
     def __init__(self):
         super().__init__('int_odometry')
 
+        self.declare_parameter('publish_tf', 'False')
+
         self.x = 0
         self.y = 0
         self.theta = 0
@@ -44,8 +46,13 @@ class IntegralOdometry(Node):
 
     
     def timer_callback(self):
+        
+        tf_param = self.get_parameter('publish_tf').get_parameter_value().bool_value
+
         self.publish_odometry_msg()
-        self.publish_odom_tf()
+
+        if tf_param:
+            self.publish_odom_tf()
 
 
     def euler_to_quaternion(self, yaw, pitch, roll):
