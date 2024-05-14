@@ -44,6 +44,9 @@ def generate_launch_description():
         executable='int_odom',
         name='int_odom_node',
         output='screen',
+        parameters=[
+                {'publish_tf': False}
+            ]
     )
 
     slam_node = Node(

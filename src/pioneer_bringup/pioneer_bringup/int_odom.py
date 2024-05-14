@@ -15,7 +15,7 @@ class IntegralOdometry(Node):
     def __init__(self):
         super().__init__('int_odometry')
 
-        self.declare_parameter('publish_tf', 'False')
+        self.declare_parameter('publish_tf', False)
 
         self.x = 0
         self.y = 0
@@ -52,6 +52,7 @@ class IntegralOdometry(Node):
         self.publish_odometry_msg()
 
         if tf_param:
+            print("Printing tf...")
             self.publish_odom_tf()
 
 
