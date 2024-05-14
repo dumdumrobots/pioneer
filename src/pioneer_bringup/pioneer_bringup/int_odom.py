@@ -10,39 +10,42 @@ from tf2_ros import TransformBroadcaster
 
 import numpy as np
 
-class RoughOdometry(Node):
+class IntegralOdometry(Node):
 
     def __init__(self):
-        super().__init__('rough_odometry')
-
-        self.curret_time = self.get_clock().now().nanoseconds
-        self.last_time = self.get_clock().now().nanoseconds
+        super().__init__('int_odometry')
 
         self.x = 0
         self.y = 0
         self.theta = 0
-
+        
+        self.delta = 0.1  # seconds
+        self.timer = self.create_timer(self.delta, self.timer_callback)
 
         self.odom_pub = self.create_publisher(
             Odometry, 
-            '/i_odom',
+            '/int_odom',
             10)
         
         self.cmd_vel_sub = self.create_subscription(
             Twist,
             '/cmd_vel',
-            self.cmd_vel_sub_callback,
+            self.cmd_vel_callback,
             10)
         
         self.cmd_vel_sub  # prevent unused variable warning
+        self.cmd_vel_msg = Twist()
 
         self.tf_broadcaster = TransformBroadcaster(self)
 
 
-    def cmd_vel_sub_callback(self,msg):
-        self.publish_odometry_msg(msg)
+    def cmd_vel_callback(self, msg):
+        self.cmd_vel_msg = msg
+
+    
+    def timer_callback(self):
+        self.publish_odometry_msg()
         self.publish_odom_tf()
-        
 
 
     def euler_to_quaternion(self, yaw, pitch, roll):
@@ -55,16 +58,12 @@ class RoughOdometry(Node):
         return [qx, qy, qz, qw]
     
 
-    def publish_odometry_msg(self, twist_msg):
+    def publish_odometry_msg(self):
 
-        self.curret_time = self.get_clock().now().nanoseconds
+        vx_R = self.cmd_vel_msg.linear.x
+        w_R = self.cmd_vel_msg.angular.z
 
-        delta = (self.curret_time - self.last_time) * 1e-9
-
-        vx_R = twist_msg.linear.x
-        w_R = twist_msg.angular.z
-
-        self.theta += w_R * delta
+        self.theta += w_R * self.delta
 
         v_R = np.array([[vx_R],
                         [0]])
@@ -74,8 +73,8 @@ class RoughOdometry(Node):
         
         v_i = np.dot(R_iR, v_R)
 
-        self.x += v_i[0,0] * delta
-        self.y += v_i[1,0] * delta
+        self.x += v_i[0,0] * self.delta
+        self.y += v_i[1,0] * self.delta
         
 
         odom = Odometry()
@@ -98,7 +97,6 @@ class RoughOdometry(Node):
         odom.twist.twist.angular.z = w_R
 
         self.odom_pub.publish(odom)
-        self.last_time = self.curret_time
     
     
     def publish_odom_tf(self):
@@ -123,7 +121,7 @@ class RoughOdometry(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    rough_odom_node = RoughOdometry()
+    rough_odom_node = IntegralOdometry()
 
     rclpy.spin(rough_odom_node)
 

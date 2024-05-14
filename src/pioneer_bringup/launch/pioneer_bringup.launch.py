@@ -45,6 +45,13 @@ def generate_launch_description():
         name='int_odom_node',
         output='screen',
     )
+
+    slam_node = Node(
+        package='slam_toolbox',
+        executable='async_slam_toolbox_node',
+        parameters=[pioneer_pkg + '/config/mapping.yaml'],
+        output='screen',
+    )
     
 
     imu_launch = IncludeLaunchDescription(
@@ -75,6 +82,7 @@ def generate_launch_description():
         imu_launch,
         teleop_launch,
         #camera_launch,
+        slam_node,
         int_odom_node,
         lidar_node,
         aria_node,
