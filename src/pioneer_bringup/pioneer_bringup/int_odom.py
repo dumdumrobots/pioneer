@@ -52,7 +52,6 @@ class IntegralOdometry(Node):
         self.publish_odometry_msg()
 
         if tf_param:
-            print("Printing tf...")
             self.publish_odom_tf()
 
 
