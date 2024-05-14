@@ -24,7 +24,6 @@ def generate_launch_description():
         arguments=['/opt/ros/humble/share/sick_scan_xd/launch/sick_tim_7xx.launch']
         )
     
-    
     aria_node = Node(
         package='aria_bringup', 
         executable='aria_bringup',
