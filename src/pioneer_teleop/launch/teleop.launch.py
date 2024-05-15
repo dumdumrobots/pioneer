@@ -27,6 +27,7 @@ def generate_launch_description():
 
             launch_arguments={
                 'joy_config': 'ps4', 
+                'joy_vel': 'cmd_vel_joy',
                 'config_filepath' : config,
                 }.items(),
             )

@@ -1,0 +1,7 @@
+twist_mux:
+  ros__parameters:
+    locks:
+      pause:
+        topic   : pause_navigation
+        timeout : 0.0
+        priority: 100

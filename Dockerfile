@@ -14,6 +14,7 @@ RUN apt-get update \
     && apt-get install -y doxygen \
     && apt-get install -y sudo \
     && apt-get install -y ros-humble-sick-scan-xd \ 
+    && apt-get install -y ros-humble-twist-mux \ 
     && apt-get install -y ros-humble-phidgets-drivers \
     && apt-get install -y ros-humble-depthai-ros \
     && apt-get install -y ros-humble-robot-localization \
