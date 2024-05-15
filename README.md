@@ -152,35 +152,67 @@ How to do that? Is it necessary when using the robot's camera where we do not ro
 
 Problem: crashes on windows, on linux not enough space.
 
-### Detect the colour:
-**Goal**: Given a the coordinates of a detected cone, decide if the cone is red or yellow.
+### Detect objects by colour and shape:
+The main script is *detectAll.py*.
+The script *detectColour/identifyHSV.py* is used to check the colour of the object. Run the script and double click on all the points where you want to know the HSV value. The colour range for the
+- orange little cones as well as the orange tall cones is [0, 85, 120] to [9, 255, 255] as well as [173,165,145] to [180,255,255],
+- yellow cones is [19,160,150] to [30,255,255],
+- red bins is [0, 155, 90] to [12, 255, 255].
 
-The RGB Image is converted to an HSV Image.
-Watch out, different applications use different scales for HSV. OpenCV uses H: 0-179, S: 0-255, V: 0-255.
-The lower bound of red is [160,50,50] and the upper bound is [180,255,255].
-The script *detectColour/detectRedColourVideo.py* detects red areas in the webcam video if they are bigger than a threshold (this threshold must be adapted for the smaller 28x28 image).
+**Difficulties**
+- The colour ranges of the red bin and the orange (tall) cones overlap. When the orange colour is detected, also some parts of the red bins are detected. Those parts have unpredictable shapes and their geometry can be detected as an orange (tall) cone even if is is a red bin.
+- If the ranges for red and orange colour are added together in order to avoid detecting little parts, also trees are detected and soil. As trees are very big this is dangerous and the red and orange colour range should not be combined.
 
-The lower bound of yellow is [20,100,100] and the upper bound is [[30,255,255].
-The script *ConeDetection/detectColour/detectYellowColourVideo.py* detects yellow areas if they are bigger than a threshold.
+The objects have different geometry that is used to distinguish between the objects.
+One main differences is that the yellow and orange little cone rather look like triangles while the detected colour areas of the red bin and the orange tall cone rather look like rectangles.
+As a first step, draw a contour around the detected area. As a second step, draw a triangle around this contour that has the minimum area. The more the contour is of shape triangle than rectangle, the smaller the area will be.
 
-The website https://cvexplained.wordpress.com/2020/04/28/color-detection-hsv/ also provides code for capturing an object in real time using cv2.resize.
-Do we need that if we only have 28x28 pixels?
+![ConeShapeTriangle](ConeDetection\detectColour\results\MinEnclosingTriangleContour.jpg)
+*The blue contour around the cone is contained in the triangle defined by the red circles.
+The green rectangle around the cone is contained in the triangle defined by the green circles.
+Dividing the area of the red triangle by the area of the green triangle gives a value smaller than 0.5*
 
-![Detect Red Colour](ConeDetection/detectColour/results/detectRedColour.png)
-![Detect Yellow Colour](ConeDetection/detectColour/results/detectYellowColour.png)
+Dividing the area of the triangle around a cone by the area of the triangle around a rectangle including the cone is around 0.35 to 0.41.
+Thus, a constraint for a cone is that dividing the two areas is less than 0.5.
+A constraint for a shape that rahter looks like a rectangle than a triangle is that dividing the areas gives a result of greater than 0.5.
 
-The script *detectColour/detectRedColourImage.py* detects red colour of all the images located in a folder. All red cones are detected as red, no yellow cone is detect as red (successfull). But also the soil is detected as red sometimes.
-![Detect Red Colour 1](ConeDetection/detectColour/results/detectRed1.jpg)
-![Detect Red Colour 2](ConeDetection/detectColour/results/detectRed2.jpg)
-This is why the script *detectColour/identifyHSV.py* is used to check the colour of the red cones that are rather orange than red. Run the script and double click on all the points where you want to know the HSV value. The new colour ranges are determined to [0,125,225] and [7,240,255] and show gut results. But probably they must be changed again in the future if there is different light or shadows.
-![Detect Red Colour 1](ConeDetection/detectColour/results/detectRed3.jpg)
-![Detect Red Colour 2](ConeDetection/detectColour/results/detectRed4.jpg)
+**Geometric constraints**
+- *orange little cone*: The detected orange contour is rather a triangle than a rectangle.
+- yellow cone: The yellow cone consists of two yellow areas and one green area in the middle. Only detect one of the yellow areas.
+- *orange tall cone*: The tall cones have a small width and a big height. The rotated rectangle that bounds the detected orange colour has a side-to-width ratio of at least 4:1.
+- *big red bin*: The big red bin is rather a rectangle than a triangle.
 
-The script *detectColour/detectYellowColourImage.py* detects yellow colour of all the images located in a folder. Some red cones are detected as yellow (not successfull). Maybe this is not too bad if we first check if the colour is red and only check for yellow colour in case no red colour was detected. Otherwise the HSV values must be adapted.
-![Detect Yellow Colour 1](ConeDetection/detectColour/results/detectYellow1.jpg)
-Also, the script *detectColour/detectRedColourImage.py* is used to identify the specific yellow colour ranges in the images. The new range is [20,190,210] to [30,255,255] and seems to be more reliable but it also needs to be checked with different light.
-![Detect Yellow Colour 2](ConeDetection/detectColour/results/detectYellow2.jpg)
+The geometric constraints are implemented such that they are rotational invariant.
+As a result, also e.g. fallen cones can be detected.
 
+**Further strategies**
+
+The objects are only detected if they have a certain size. If they are far away it is more likely that the detection fails and the objects in the distance are of less interest.
+As the objects have different sizes, for each object the relative number of pixel areas that is needed to detect the object is defined.
+Visually, the picture is divided into *N* equal parts. If the detected object is larger than the area of one part, it is detected.
+The smaller the detected colour areas of the object, the bigger *N*.
+- *orange little cone*: *N* = 256
+- yellow cone: *N* = 256
+- *orange tall cone*: *N* = 64
+- *big red bin*: *N* = 16
+
+In order to avoid false positives, at first the object detections are performed that are most reliable.
+If first, a big red bin is detected and afterwards, a part of the red bin is detected as an orange little cone, the orange little cone is not added to the list of added objects because its area overlaps with the area of the red bin.
+The objects are detected in the following order: yellow cones, red bins, orange tall cones, orange little cones.
+
+**Results**
+![DetectOnlyNearRedCones](ConeDetection\detectColour\results\detectRedButOnlyCones.jpg)
+*Here, only near red orange little cones are detected. The colour of the tall orange cone and the red are also detected but their geometry does not match the desired geometry of an orange little cone. The left little orange cone is detected because it is near enough. The right little cone is not detected because it is a little smaller.*
+
+![DetectAll](ConeDetection\detectColour\results\allCones.jpg)
+*In this picture, all object detectors are turned on after each other. The yellow cone and the red big bin are detected because they are near. Some parts of the red bin are detected as orange but as the red bin is detected first, no other object can be detected in the area.
+The orange cone in the distance is not detected because it is too far away.*
+
+![DetectAll](ConeDetection\detectColour\results\allCones2.jpg)
+*This time, the orange tall cone is detected because it is near. Also two orange little cones are detected but not the two orange little cones in the distance.*
+
+![DetectAll](ConeDetection\detectColour\results\FallenCone.jpg)
+*The object detection is rotation invariant and also fallen cones are detected.*
 
 ## 6. Avoid Collision with Moving Obstacles
 Implement collision avoidance with moving obstacles, triggering an emergency stop if an object comes within 1m of the robot.
