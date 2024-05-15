@@ -22,11 +22,21 @@ def generate_launch_description():
         parameters=[pioneer_pkg + '/config/mapping.yaml'],
         output='screen',
     )
+
+    nav2_params = os.path.join(
+        get_package_share_directory('pioneer_bringup'),
+        'config',
+        'nav2_params.yaml'
+        )
     
     nav_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('nav2_bringup'), 
             'launch'),'/navigation_launch.py']),
+
+            launch_arguments={
+                'params_file' : nav2_params,
+                }.items(),
             )
     
 
