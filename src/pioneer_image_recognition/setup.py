@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'pioneer_image_recognition = pioneer_core.pioneer_image_recognition:main',
         ],
     },
 )

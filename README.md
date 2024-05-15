@@ -1,6 +1,22 @@
 # Pioneer
 Pioneer Robot Repository for UWA Mobile Robots.
 
+# Image Recognition
+Run the docker image as per below
+
+Run pioneer_bringup - need the camera to be running and publishing to /oak/stereo/image_raw  
+If the topic is different this needs to be changed in ./src/pioneer_image_recognition/pioneer_image_recognition/pioneer_image_recognition.py, line:
+self.subscription = self.create_subscription(Image, '/oak/stereo/image_raw', self.image_cb, 10)
+
+ros2 run pioneer_image_recognition pioneer_image_recognition
+
+in a seperate terminal:
+ros2 topic echo /number_recog
+
+## Potential Issues:
+- Add dependencies to ./src/pioneer_image_recognition/package.xml
+- Dependencies for cv2
+
 # Github
 ## Updating your branch to master
 From a up to date branch
