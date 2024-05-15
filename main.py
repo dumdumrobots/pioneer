@@ -1,1 +1,0 @@
-print("DOCKER IS WORKING")
