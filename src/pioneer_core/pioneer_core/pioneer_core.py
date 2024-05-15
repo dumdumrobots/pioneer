@@ -13,15 +13,15 @@ AXIS_TRIGGER_RIGHT = 5
 class Pioneer_Core(Node):
 
     def __init__(self):
-        self.joy_buttons # Joy msg (axes[], buttons[])
-        self.joy_axes
+        self.joy_buttons = [] # Joy msg (axes[], buttons[])
+        self.joy_axes = []
         # self.number = None # Number detection (number, location)
         # self.numbers = [] # List of numbers detected
         # self.colour = None # Colour detection (colour, location)
         # self.colours = [] # List of colours detected
         self.auto_drive = False
         super().__init__('pioneer_core')
-        self.subscription = self.create_subscription(Joy, '/joy', joy_cb(), 10)
+        self.subscription = self.create_subscription(Joy, '/joy', self.joy_cb, 10)
         # self.subscription = self.create_subscription(Number, '/number_recog', lambda number:number_cb(number), 10)
         # self.subscription = self.create_subscription(Colour, '/colour_recog', lambda colour:colour_cb(colour), 10)
 
@@ -36,7 +36,7 @@ class Pioneer_Core(Node):
     #     self.colour = colour
     
     def main(self):
-        while self.joy == None:
+        while self.joy_buttons == []:
             continue
 
         if self.joy_buttons[BUTTON_CROSS]:

@@ -1,85 +1,56 @@
 import rclpy
 from rclpy.node import Node
 
+import threading
+
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import Pose
+# from geometry_msgs.msg import Pose
 
 from ROI import DigitRecogniser
 
-class Pioneer_Core(Node):
+from ImageRecognition import *
+
+from cv_bridge import CvBridge
+
+class Pioneer_Image_Recognition(Node):
 
     def __init__(self):
-        self.joy = None # Joy msg (axes[], buttons[])
-        self.number = None # Number detection (number, location)
-        self.numbers = [] # List of numbers detected
-        self.colour = None # Colour detection (colour, location)
-        self.colours = [] # List of colours detected
-        self.auto_drive = False
-        super().__init__('pioneer_core')
-        self.subscription = self.create_subscription(Joy, '/joy', lambda msg:joy_cb(self, msg), 10)
-        self.subscription = self.create_subscription(Number, '/number_recog', lambda number:number_cb(number), 10)
-        self.subscription = self.create_subscription(Colour, '/colour_recog', lambda colour:colour_cb(colour), 10)
+        # self.pose = Pose()
+        super().__init__('pioneer_image_recognition')
+        self.subscription = self.create_subscription(Image, '/oak/stereo/image_raw', self.image_cb, 10)
+        # self.subscription = self.create_subscription(Pose, '/odom', self.pose_cb, 10)
+        self.publisher_ = self.create_publisher(Number, '/number_recog', 10)
+        # self.publisher_ = self.create_publisher(Colour, '/colour_recog', 10)
 
-    def joy_cb(self, msg):
-        self.joy_data = msg
 
-    def num_cb(self, number):
-        self.number = number
+    def image_cb(self, msg):
+        self.image = msg.data
 
-    def colour_cb(self, colour):
-        self.colour = colour
-    
-    def main(self):
-        if self.joy.buttons[BUTTON_CROSS]:
-            # Enable autonomous mode
-            self.auto_drive = True
-            self.get_logger().info("Enabling autonomous mode")
-        
-        if self.joy.buttons[BUTTON_CIRCLE]:
-            # Enable manual mode
-            self.auto_drive = False
-            self.get_logger().info("Enabling manual mode")
+        digit_recogniser = DigitRecogniser()
+        bridge = CvBridge()
 
-        while self.auto_drive and (self.joy.axis[AXIS_TRIGGER_LEFT] or self.joy.axis[AXIS_TRIGGER_RIGHT]):
-            # Drive autonomously
-            self.get_logger().info("Driving autonomously")
+        cv_image = bridge.imgmsg_to_cv2(self.image, desired_encoding='passthrough')
 
-            if len(numbers) < 9:
-                # Explore Unknown Area
+        digits = digit_recogniser.process_frame(cv_image)
 
-                if self.number:
-                    # Save number
-                    self.numbers.append(self.number)
-                    self.number = None # This may overwrite the number appended to the list
-                
-                if self.colour:
-                    # Save colour
-                    self.colours.append(self.colour)
-                    self.colour = None # This may overwrite the colour appended to the list
-                
-                # E STOP if moving object comes within 1 m
+        for digit in digits:
+            number = Number(digit[0], digit[1]) # Number, Size, Pose
+            self.publisher_.publish(number)
 
-                # UI to show robots internal state and intended actions
-            else:
-                # Drive to 3 waypoints
+
+    # def pose_cb(self, msg):
+    #     self.pose = msg.position
 
 
 def main():
     rclpy.init()
 
     # Create a node that subscribes to the /joy topic and publishes to the /skidbot/cmd_vel topic.
-    node = Pioneer_Core()
-    # subscription = node.create_subscription(Joy, '/joy', lambda msg: joy_callback(msg), 10)
-    # subscription2 = node.create_subscription()
-    # publisher = node.create_publisher(Twist, '/skidbot/cmd_vel', 10)
+    node = Pioneer_Image_Recognition()
 
     # Spin the node to receive messages and call the joy_callback function for each message.
 
-    rate = node.create_rate(10)
-
-    while rclpy.ok()
-        node.main()
-        rate.sleep()
+    rclpy.spin(node)
     
     # Clean up before exiting.
     node.destroy_node()
