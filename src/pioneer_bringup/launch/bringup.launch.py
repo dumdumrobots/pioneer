@@ -88,10 +88,12 @@ def generate_launch_description():
     camera_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('depthai_ros_driver'), 
-            'launch'),'/rgbd_pcl.launch.py']),
+            'launch'),'/camera.launch.py']),
 
             launch_arguments={
                 'use_rviz': 'False',
+                'parent_frame' : 'cam_link',
+                'rsp_use_composition' : 'false',
                 }.items(),
             )
     
