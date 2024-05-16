@@ -93,7 +93,6 @@ def generate_launch_description():
             launch_arguments={
                 'use_rviz': 'False',
                 'parent_frame' : 'cam_link',
-                'rsp_use_composition' : 'false',
                 }.items(),
             )
     
