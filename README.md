@@ -1,6 +1,7 @@
 # Pioneer
 Pioneer Robot Repository for UWA Mobile Robots.
 
+<<<<<<< HEAD
 ## Pioneer Setup
 
 ## Docker
@@ -89,3 +90,22 @@ Show the robot's planned path graphically on a screen.
 
 ## 12. Record Drives for Offline Review
 Record drives for later review offline.
+=======
+# Steps:  
+-1: 
+```sh
+docker build -t pioneer .
+```
+
+-2:
+```sh
+docker run pioneer
+```
+
+# Checks:
+Check If Container Running
+```sh
+docker ps
+```
+
+>>>>>>> 39d6a94 (ref: Added in ReadMe)
