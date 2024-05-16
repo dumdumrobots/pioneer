@@ -20,6 +20,7 @@ RUN apt-get update \
     && apt-get install -y ros-humble-robot-localization \
     && apt-get install -y ros-humble-slam-toolbox \
     && apt-get install -y ros-humble-navigation2 ros-humble-nav2-bringup \
+    && apt-get install -y ros-humble-navigation2 ros-humble-nav2-simple-commander \
     && rm -rf /var/lib/apt/lists/* \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME\
     && chmod 0440 /etc/sudoers.d/$USERNAME 
