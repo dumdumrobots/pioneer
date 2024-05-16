@@ -44,7 +44,7 @@ def generate_launch_description():
         name='int_odom_node',
         output='screen',
         parameters=[
-                {'publish_tf': False}
+                {'publish_tf': True}
             ]
     )
     
@@ -104,5 +104,5 @@ def generate_launch_description():
         int_odom_node,
         lidar_node,
         aria_node,
-        ekf_node,
+        #ekf_node,
     ])
