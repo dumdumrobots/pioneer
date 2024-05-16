@@ -91,7 +91,7 @@ def generate_launch_description():
             'launch'),'/camera.launch.py']),
 
             launch_arguments={
-                'use_rviz': 'False',
+                'use_rviz': 'false',
                 'parent_frame' : 'cam_link',
                 }.items(),
             )
