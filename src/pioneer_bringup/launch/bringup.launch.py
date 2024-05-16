@@ -100,7 +100,7 @@ def generate_launch_description():
     return LaunchDescription([
         imu_launch,
         teleop_launch,
-        camera_launch,
+        #camera_launch,
         twist_mux_launch,
         int_odom_node,
         lidar_node,

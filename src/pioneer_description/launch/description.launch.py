@@ -35,7 +35,7 @@ def generate_launch_description():
             {'robot_description': robot_desc},
         ],
         remappings=[
-            ('/robot_description', '/pioneer/robot_description'),
+            ('/robot_description', '/robot_description'),
         ]
     )
 
