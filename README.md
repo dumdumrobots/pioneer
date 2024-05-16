@@ -56,7 +56,13 @@ During the exploration of the unknown environment:
 5. Save the location of the cone.
 
 ### Detect the cones:
-#### Var 1: SIFT/ORB:
+#### Var 1: ORB (Orientation FAST and Rotated BRIEF):
+ORB is a combination of FAST keypoint detector and BRIEF descriptor.
+In brief, FAST is used to find the keypoints of an object.
+Secondly, Harris corner measure is applied to find the top N keypoints.
+In order to find the same object in a second image, the keypoints between the two images are matched by identifying their nearest neighbour.
+The benefit of ORB is that it is roation-invariant and scale-invariant.
+
 SIFT
 https://docs.opencv.org/4.x/da/df5/tutorial_py_sift_intro.html
 
@@ -81,7 +87,10 @@ Sadly, detecting the cones (*ConeDetection/ORB/detect_Cone.py*) did not succeed.
 ![Cone Matches Similar](ConeDetection/ORB/results/ConeMatches1.png)
 ![Cone Matches Many House](ConeDetection/ORB/results/ConeMatches2.png)
 
-#### Var 2: Yolo
+#### Var 2: YOLO
+YOLOv5 is the fifth iteration of the "You Only Look Once" object detection model that is known for its speed and accuracy.
+The object detection problem is addressed using an end-to-end neural network.
+All its predictions are made with the help of a single fully connected layer.
 The code is based on https://github.com/jhan15/traffic_cones_detection/tree/master/images.
 
 1. clone yolov5
