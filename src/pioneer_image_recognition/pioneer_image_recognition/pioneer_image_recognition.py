@@ -1,8 +1,6 @@
 import rclpy
 from rclpy.node import Node
 
-import threading
-
 from sensor_msgs.msg import Image
 # from geometry_msgs.msg import Pose
 
@@ -38,7 +36,7 @@ class Pioneer_Image_Recognition(Node):
             self.publisher_.publish(number)
 
 
-    # def pose_cb(self, msg):
+    # def pose_cb(self, msg):ssssssssssssssssssssssssssssssssssssss
     #     self.pose = msg.position
 
 

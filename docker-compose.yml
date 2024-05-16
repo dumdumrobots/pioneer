@@ -3,7 +3,7 @@ services:
   pioneer:
     build: .
     image: pioneer:latest
-    container_name: pioneer2
+    container_name: pioneer
     network_mode: "host"
 
     user: ros
@@ -19,3 +19,4 @@ services:
 
     stdin_open: true # docker run -i
     tty: true        # docker run -t
+s

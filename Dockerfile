@@ -36,6 +36,8 @@ WORKDIR /home/$USERNAME/pioneer_ws
 
 ENV LD_LIBRARY_PATH ~/pioneer_ws/src/AriaCoda/lib
 
+RUN python3 -m pip install -r /home/$USERNAME/pioneer_ws/requirements.txt
+
 RUN rosdep install -i --from-path src --rosdistro humble -y \
     && . /opt/ros/humble/setup.sh \
     && colcon build \

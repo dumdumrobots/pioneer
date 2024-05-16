@@ -4,7 +4,7 @@ package_name = 'pioneer_image_recognition'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='0.0.0',sssssssssssssssssss
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -16,11 +16,11 @@ setup(
     maintainer='montic',
     maintainer_email='montic@todo.todo',
     description='TODO: Package description',
-    license='TODO: License declaration',
-    tests_require=['pytest'],
-    entry_points={
+    license='TODO: License declaration',sssssssssssssssssssssssssss
+    tests_require=['pytest'],sssssssssssssssssssssss
+    entry_points={sssssssssssssssssssssssssssssssss
         'console_scripts': [
-            'pioneer_image_recognition = pioneer_core.pioneer_image_recognition:main',
+            'pioneer_image_recognition = pioneer_image_recognition.pioneer_image_recognition:main',
         ],
     },
 )
