@@ -33,6 +33,9 @@ def generate_launch_description():
         parameters=[
             {'use_sim_time': True},
             {'robot_description': robot_desc},
+        ],
+        remappings=[
+            ('/robot_description', '/pioneer/robot_description'),
         ]
     )
 
