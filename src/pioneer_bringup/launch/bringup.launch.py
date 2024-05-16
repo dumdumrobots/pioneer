@@ -14,7 +14,7 @@ from launch.substitutions import PathJoinSubstitution, TextSubstitution
 def generate_launch_description():
 
     pioneer_pkg = get_package_share_directory('pioneer_bringup')
-    robot_localization_file_path = os.path.join(pioneer_pkg, 'config/ekf.yaml')
+    robot_localization_config = os.path.join(pioneer_pkg, 'config/ekf.yaml')
 
 
     lidar_node = Node(
@@ -36,7 +36,7 @@ def generate_launch_description():
         executable='ekf_node',
         name='ekf_filter_node',
         output='screen',
-        parameters=[robot_localization_file_path])
+        parameters=[robot_localization_config])
     
     int_odom_node = Node(
         package='pioneer_bringup',
@@ -44,7 +44,7 @@ def generate_launch_description():
         name='int_odom_node',
         output='screen',
         parameters=[
-                {'publish_tf': True}
+                {'publish_tf': False}
             ]
     )
     
@@ -88,10 +88,10 @@ def generate_launch_description():
     camera_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('depthai_ros_driver'), 
-            'launch'),'/camera.launch.py']),
+            'launch'),'/rgbd_pcl.launch.py']),
 
             launch_arguments={
-                'use_rviz': 'false',
+                'use_rviz': 'False',
                 }.items(),
             )
     
@@ -99,10 +99,10 @@ def generate_launch_description():
     return LaunchDescription([
         imu_launch,
         teleop_launch,
-        #camera_launch,
+        camera_launch,
         twist_mux_launch,
         int_odom_node,
         lidar_node,
         aria_node,
-        #ekf_node,
+        ekf_node,
     ])
