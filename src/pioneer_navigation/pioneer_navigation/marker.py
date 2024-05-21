@@ -4,44 +4,77 @@ import rclpy
 from rclpy.node import Node
 from visualization_msgs.msg import Marker
 
-class Marker(Node):
-    def __init__(self,  id, name, x, y, z):
 
-        super().__init__(name)
-        self.publisher_ = self.create_publisher(Marker, name, 10)  
+class WaypointManager(Node):
+    
+    def __init__(self, waypoints):
 
-        self.marker = Marker()
-        self.marker.header.frame_id = '/map'
-        self.marker.header.stamp = self.get_clock().now().to_msg()
-        self.marker.type = self.marker.CUBE
-        self.marker.id = id
-        self.marker.action = self.marker.ADD
+        self.publisher_dic = {}
+        self.waypoint_dic = {}
 
-        self.marker.scale.x = 0.5
-        self.marker.scale.y = 0.5
-        self.marker.scale.z = 0.5
-        self.marker.color.r = 1.0
-        self.marker.color.g = 0.0
-        self.marker.color.b = 0.0
-        self.marker.color.a = 1.0
+        super().__init__('waypoint_manager')
+        self.timer = self.create_timer(0.1, self.timer_callback)
+        
+        for index, waypoint in enumerate(waypoints):
 
-        self.marker.pose.position.x = x
-        self.marker.pose.position.y = y
-        self.marker.pose.position.z = z
-        self.get_logger().info("Publishing marker topic.")
+            name = 'marker_{0}'.format(index)
+            
+            self.publisher_dic[name] = self.create_publisher(Marker, name, 10)
+            self.waypoint_dic[name] = self.create_marker_msg(index, waypoint[0], waypoint[1])
+            self.get_logger().info("Marker {0} created.".format(name))
 
-    def publish_marker(self):
-        self.publisher_.publish(self.marker)
+
+    def timer_callback(self):
+        for name in self.waypoint_dic:
+            self.publisher_dic[name].publish(self.waypoint_dic[name])
+
+    def create_marker_msg(self, id, x, y):
+        
+        name = 'marker_{0}'.format(id)
+
+        marker = Marker()
+        marker.header.frame_id = '/base_link'
+        marker.header.stamp = self.get_clock().now().to_msg()
+        marker.type = marker.CUBE
+        marker.id = id
+        marker.action = marker.ADD
+
+        marker.scale.x = 0.05
+        marker.scale.y = 0.05
+        marker.scale.z = 0.3
+
+        marker.color.r = 0.0
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+        marker.color.a = 1.0
+
+        marker.pose.position.x = x
+        marker.pose.position.y = y
+        marker.pose.position.z = 0.15
+        
+        return marker
 
 def main(args=None):
     rclpy.init(args=args)
+
+    waypoints = []
+
+    w1 = [1.0, 0.0]
+    w2 = [1.0, 1.0]
+    w3 = [0.0, 1.0]
+    w4 = [0.0, 0.0]
+
+    waypoints.append(w1)
+    waypoints.append(w2)
+    waypoints.append(w3)
+    waypoints.append(w4)
+
+    manager = WaypointManager(waypoints=waypoints)
     
-    balloon = Marker()
+    rclpy.spin(manager)
 
-    while rclpy.ok():
-        balloon.publish_marker()
+    manager.destroy_node()
 
-    balloon.destroy_node()  
     rclpy.shutdown()
 
 if __name__ == '__main__':

@@ -4,56 +4,54 @@ from geometry_msgs.msg import PoseStamped
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 import rclpy
 from rclpy.duration import Duration
+from marker import WaypointManager
+
+
+def create_pose(navigator, x,y,w,z):
+
+    pose = PoseStamped()
+    pose.header.frame_id = 'map'
+    pose.header.stamp = navigator.get_clock().now().to_msg()
+    pose.pose.position.x = x
+    pose.pose.position.y = y
+    pose.pose.orientation.w = w
+    pose.pose.orientation.z = z
+
+    waypoint = [x,y]
+
+    return pose, waypoint
+
 
 def main():
     rclpy.init()
 
     navigator = BasicNavigator()
 
-    # Set our demo's initial pose
-    initial_pose = PoseStamped()
-    initial_pose.header.frame_id = 'map'
-    initial_pose.header.stamp = navigator.get_clock().now().to_msg()
-
-    initial_pose.pose.position.x = 0.0
-    initial_pose.pose.position.y = 0.0
-    initial_pose.pose.orientation.w = 1.0
+    initial_pose = create_pose(navigator=navigator,x=0.0,y=0.0,w=1.0,z=0.0)
 
     navigator.setInitialPose(initial_pose)
 
     # set our demo's goal poses
+    goal_waypoints = []
     goal_poses = []
-    
-    goal_pose1 = PoseStamped()
-    goal_pose1.header.frame_id = 'map'
-    goal_pose1.header.stamp = navigator.get_clock().now().to_msg()
-    goal_pose1.pose.position.x = 1.5
-    goal_pose1.pose.position.y = 0
-    goal_pose1.pose.orientation.w = 0.707
-    goal_pose1.pose.orientation.z = 0.707
-    goal_poses.append(goal_pose1)
 
-    # additional goals can be appended
-    goal_pose2 = PoseStamped()
-    goal_pose2.header.frame_id = 'map'
-    goal_pose2.header.stamp = navigator.get_clock().now().to_msg()
-    goal_pose2.pose.position.x = 1.5
-    goal_pose2.pose.position.y = 1.5
-    goal_pose2.pose.orientation.w = 0
-    goal_pose2.pose.orientation.z = 1
+    goal_pose1, goal_waypoint1 = create_pose(navigator=navigator,x=1.5,y=0.0,w=0.707,z=0.707)
+    goal_poses.append(goal_pose1)
+    goal_waypoints.append(goal_waypoint1)
+
+    goal_pose2, goal_waypoint2 = create_pose(navigator=navigator,x=1.5,y=1.5,w=0,z=1)
     goal_poses.append(goal_pose2)
+    goal_waypoints.append(goal_waypoint2)
 
-    goal_pose3 = PoseStamped()
-    goal_pose3.header.frame_id = 'map'
-    goal_pose3.header.stamp = navigator.get_clock().now().to_msg()
-    goal_pose3.pose.position.x = 0
-    goal_pose3.pose.position.y = 1.5
-    goal_pose3.pose.orientation.w = 0.707
-    goal_pose3.pose.orientation.z = -0.707
+    goal_pose3, goal_waypoint3 = create_pose(navigator=navigator,x=0.0,y=1.5,w=0.707,z=-0.707)
     goal_poses.append(goal_pose3)
+    goal_waypoints.append(goal_waypoint3)
 
     goal_poses.append(goal_pose1)
+    goal_waypoints.append(goal_waypoint1)
 
+    manager = WaypointManager(waypoints=goal_waypoints)
+    
     navigator.goThroughPoses(goal_poses)
 
     i = 0
@@ -93,6 +91,7 @@ def main():
         print('Goal has an invalid return status!')
 
     navigator.lifecycleShutdown()
+    manager.destroy_node()
 
     exit(0)
 

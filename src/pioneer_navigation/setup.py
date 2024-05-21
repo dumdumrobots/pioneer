@@ -30,6 +30,7 @@ setup(
     entry_points={
         'console_scripts': [
             'navigator = pioneer_navigation.navigator:main',
+            'marker = pioneer_navigation.marker:main',
         ],
     },
 )
