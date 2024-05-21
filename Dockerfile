@@ -16,6 +16,7 @@ RUN apt-get update \
     && apt-get install -y ros-humble-sick-scan-xd \ 
     && apt-get install -y ros-humble-phidgets-drivers \
     && apt-get install -y ros-humble-depthai-ros \
+    && apt-get install -y python3-pip \
     && rm -rf /var/lib/apt/lists/* \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME\
     && chmod 0440 /etc/sudoers.d/$USERNAME 
@@ -36,7 +37,7 @@ WORKDIR /home/$USERNAME/pioneer_ws
 
 ENV LD_LIBRARY_PATH ~/pioneer_ws/src/AriaCoda/lib
 
-RUN python3 -m pip install -r /home/$USERNAME/pioneer_ws/requirements.txt
+RUN python3 -m pip install -r /home/$USERNAME/pioneer_ws/src/requirements.txt
 
 RUN rosdep install -i --from-path src --rosdistro humble -y \
     && . /opt/ros/humble/setup.sh \
