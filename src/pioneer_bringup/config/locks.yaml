@@ -1,7 +1,12 @@
 twist_mux:
   ros__parameters:
     locks:
-      pause:
-        topic   : pause_navigation
+      pause_navigation:
+        topic   : pause_nav
         timeout : 0.0
         priority: 100
+
+      pause_manual:
+        topic   : pause_man
+        timeout : 0.0
+        priority: 150
