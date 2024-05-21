@@ -88,20 +88,10 @@ class MarkerManager(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    waypoints = []
-
-    w1 = [1.0, 0.0]
-    w2 = [1.0, 1.0]
-    w3 = [0.0, 1.0]
-    w4 = [0.0, 0.0]
-
-    waypoints.append(w1)
-    waypoints.append(w2)
-    waypoints.append(w3)
-    waypoints.append(w4)
+    landmark = [[0.0, 0.0]]
 
     manager = MarkerManager()
-    manager.waypoints = waypoints
+    manager.landmarks = landmark
     
     rclpy.spin(manager)
 

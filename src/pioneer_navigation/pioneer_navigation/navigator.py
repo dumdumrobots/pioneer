@@ -24,6 +24,7 @@ class WaypointManager(Node):
         self.goal_poses.append(gp1)
         self.goal_waypoints.append(gw1)
 
+        '''
         gp2, gw2 = self.create_pose(x=1.5, y=1.5, w=0, z=1)
         self.goal_poses.append(gp1)
         self.goal_waypoints.append(gw1)
@@ -35,6 +36,7 @@ class WaypointManager(Node):
         gp4, gw4 = self.create_pose(x=1.5, y=0.0, w=0.707, z=0.707)
         self.goal_poses.append(gp1)
         self.goal_waypoints.append(gw1)
+        '''
 
         self.publish_timer = self.create_timer(0.1, self.publish_timer_callback)
 
@@ -67,10 +69,10 @@ def main():
 
     navigator = BasicNavigator()
 
-    initial_pose, initial_waypoint = manager.create_pose(navigator=navigator,x=0.0,y=0.0,w=1.0,z=0.0)
-    navigator.setInitialPose(initial_pose)
-
     manager = WaypointManager(waypoints=goal_waypoints)
+
+    initial_pose, initial_waypoint = manager.create_pose(x=0.0,y=0.0,w=1.0,z=0.0)
+    navigator.setInitialPose(initial_pose)
 
     goal_waypoints = manager.goal_waypoints
     goal_poses = manager.goal_poses
