@@ -1,5 +1,6 @@
 
 import os
+import xacro
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -13,11 +14,10 @@ from launch_ros.actions import Node
 def generate_launch_description():
 
     description_pkg = get_package_share_directory('pioneer_description')
+    file_subpath = 'robots/pioneer.urdf.xacro'
 
-    robot_file = os.path.join(description_pkg, 'robots', 'pioneer.urdf')
-
-    with open(robot_file, 'r') as infp:
-        robot_desc = infp.read()
+    xacro_file = os.path.join(description_pkg,file_subpath)
+    robot_desc = xacro.process_file(xacro_file).toxml()
 
     rviz_launch_arg = DeclareLaunchArgument(
         'rviz', default_value='true',

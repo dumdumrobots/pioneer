@@ -42,7 +42,6 @@ def generate_launch_description():
 
                     launch_arguments={
                         'params_file' : nav2_params,
-                        'parent_frame' : 'camera_link',
                         }.items(),
                     ),
         ]

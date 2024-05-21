@@ -1,0 +1,137 @@
+import os
+import xacro
+
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, ExecuteProcess
+from launch.conditions import IfCondition
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.actions import Node
+
+
+def generate_launch_description():
+
+    description_pkg = get_package_share_directory('pioneer_description')
+    pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
+
+    sdf_file = os.path.join(description_pkg, 'worlds', 'basic_urdf.sdf')
+
+    robot_file = os.path.join(description_pkg, 'robots', 'pioneer.urdf')
+
+    with open(sdf_file, 'r') as infp:
+        world_desc = infp.read()
+
+    with open(robot_file, 'r') as infp:
+        robot_desc = infp.read()
+
+    rviz_launch_arg = DeclareLaunchArgument(
+        'rviz', default_value='true',
+        description='Open RViz.'
+    )
+
+    gazebo = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py'),
+        ),
+        launch_arguments={'gz_args': PathJoinSubstitution([
+            description_pkg,
+            'worlds',
+            'basic_urdf.sdf'
+        ])}.items(),
+    )
+
+    robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher',
+        output='both',
+        parameters=[
+            {'use_sim_time': True},
+            {'robot_description': robot_desc},
+        ]
+    )
+
+    # Launch rviz
+    rviz = Node(
+        package='rviz2',
+        executable='rviz2',
+        arguments=['-d', os.path.join(description_pkg, 'rviz', 'pioneer_sim.rviz')],
+        condition=IfCondition(LaunchConfiguration('rviz')),
+    )
+
+    robot = ExecuteProcess(
+        cmd=["ros2", "run", "ros_gz_sim", "create", "-topic", "robot_description", "-z", "0.2"],
+        name="spawn robot",
+        output="both"
+    )
+
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/lidar@sensor_msgs/msg/LaserScan@ignition.msgs.LaserScan',
+                   '/imu@sensor_msgs/msg/Imu@ignition.msgs.IMU',
+                   '/model/pioneer3at_body/odometry@nav_msgs/msg/Odometry@ignition.msgs.Odometry',
+                   '/model/pioneer3at_body/tf@tf2_msgs/msg/TFMessage@ignition.msgs.Pose_V',
+                   '/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist',
+                   '/camera@sensor_msgs/msg/Image@ignition.msgs.Image',
+                   ],
+        output='screen',
+        remappings=[('/cmd_vel','/cmd_vel'),
+                    ('/model/pioneer3at_body/odometry','/odom'),
+                    ('/model/pioneer3at_body/tf','/tf')
+                    ]
+    )
+
+    joint_state_pub = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher'
+    )
+
+    robot_steering = Node(
+        package="rqt_robot_steering",
+        executable="rqt_robot_steering",
+    )
+
+    pioneer_base_fp_link_tf = Node(package='tf2_ros', 
+                                executable='static_transform_publisher', 
+                                name='base_fp_linkTF', 
+                                output='log', 
+                                arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0',  'pioneer3at_body/base_footprint', 'base_footprint'])
+    
+    slam_toolbox = Node(package='slam_toolbox',
+                        executable='async_slam_toolbox_node', 
+                        parameters=[
+                            description_pkg + '/config/mapping_sim.yaml'
+                            ],
+                        output='screen',
+    )
+
+    nav2_params = os.path.join(
+        get_package_share_directory('pioneer_description'),
+        'config',
+        'params_sim.yaml'
+        )
+
+    nav2_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('nav2_bringup'), 
+            'launch'),'/navigation_launch.py']),
+                    launch_arguments={
+                        'params_file' : nav2_params,
+                        }.items(),
+                    )
+
+    return LaunchDescription([
+        rviz_launch_arg,
+        gazebo,
+        robot,
+        bridge,
+        robot_state_publisher,
+        joint_state_pub,
+        rviz,
+        #robot_steering,
+        pioneer_base_fp_link_tf,
+        slam_toolbox,
+        nav2_launch
+    ])
