@@ -58,6 +58,7 @@ images = np.empty(len(files), dtype=object)
 for n in range(0, len(files)):
     frame = cv2.imread(join(folder_path,files[n]))
     print(files[n])
+    # print(frame.shape) # heiht, width, for smartphone images 3072x4096
     
     #uncomment the next two lines if you want to detect one specific object, e.g. only tall cones:
     array_detectedAll_centerXYwh = []
@@ -78,5 +79,8 @@ for n in range(0, len(files)):
     # #detect little orange cones
     frame, array_littleCone_centerXYwh, array_detectedAll_centerXYwh, Box4points_littleCone, array_detectedAll_4points = detectRedLittleCones(frame,image_divide_redLittleCone,lower1_littleOrange,upper1_littleOrange,lower2_littleOrange,upper2_littleOrange,array_detectedAll_4points, array_detectedAll_centerXYwh)
     print(str(len(array_littleCone_centerXYwh)) + " red little near cone(s) detected")
+    # cone1 = array_littleCone_centerXYwh[0]
+    # print("x"+str(cone1[0]))
+    # print("y"+str(cone1[1]))
                   
     cv2.imwrite(join(output_path,files[n]), frame)

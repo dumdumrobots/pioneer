@@ -82,12 +82,15 @@ def detectTallCones(frame,image_divide_TallCone,lower1_red,upper1_red,lower2_red
                             
                     if areaMinEnclosingTriangle[0] > 0.5*areaMinEnclosingRectangle[0] and relation_wh_Fits:
                         #rather triangle than rectangle
-                        frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(0,255,255),20) #cyan very thick line
-                        #add the rectangle to the list
-                        array_tallCone_centerXYwh.append([x, y, w, h])
-                        array_detectedAll_centerXYwh.append([x, y, w, h])
-                        Box4points_tallCone.append(rectRotatedBox4points)                        
-                        array_detectedAll_4points.append(rectRotatedBox4points)
+                        
+                        (imageh,imagew,imagec) = frame.shape
+                        if x>= imagew-10 or x>= 0+10: #make sure that that not a red bin that is cut is detected as tall cone 
+                            frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(0,255,255),20) #cyan very thick line
+                            #add the rectangle to the list
+                            array_tallCone_centerXYwh.append([x, y, w, h])
+                            array_detectedAll_centerXYwh.append([x, y, w, h])
+                            Box4points_tallCone.append(rectRotatedBox4points)                        
+                            array_detectedAll_4points.append(rectRotatedBox4points)
                         
        
     return frame, array_tallCone_centerXYwh, array_detectedAll_centerXYwh, Box4points_tallCone, array_detectedAll_4points
