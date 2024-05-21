@@ -42,7 +42,7 @@ def main():
     # Activate navigation, if not autostarted. This should be called after setInitialPose()
     # or this will initialize at the origin of the map and update the costmap with bogus readings.
     # If autostart, you should `waitUntilNav2Active()` instead.
-    # navigator.lifecycleStartup()
+    navigator.lifecycleStartup()
 
     # Wait for navigation to fully activate, since autostarting nav2
     #navigator.waitUntilNav2Active()
