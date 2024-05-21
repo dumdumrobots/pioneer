@@ -22,7 +22,7 @@ class WaypointManager(Node):
         self.goal_waypoints = []
         self.goal_poses = []
         
-        gp1, gw1 = self.create_pose(x=1.5, y=0.0, w=0.707, z=0.707)
+        gp1, gw1 = self.create_pose(x=-0.5, y=0.0, w=0.0, z=1.0)
         self.goal_poses.append(gp1)
         self.goal_waypoints.append(gw1)
 
@@ -46,12 +46,12 @@ class WaypointManager(Node):
 
     def publish_timer_callback(self):
 
-        self.get_logger().info("Publishing Waypoint Array {0}".format(self.goal_waypoints))
-
         msg_array = np.array(self.goal_waypoints)
 
         msg = Float64MultiArray()
         msg.data = msg_array.reshape(int(msg_array.size)).tolist()
+
+        self.get_logger().info("Publishing Waypoint Array: {0}".format(msg_array.reshape(int(msg_array.size)).tolist()))
 
         self.waypoint_publisher.publish(msg)
 

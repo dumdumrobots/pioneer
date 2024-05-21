@@ -34,18 +34,19 @@ class MarkerManager(Node):
         marker_array = MarkerArray()
         marker_array.markers = self.waypoint_markers + self.landmark_markers
 
-        #self.get_logger().info("Publishing Marker Array {0}".format(marker_array))
+        #self.get_logger().info("Publishing Marker Array {0}".format(marker_array.markers))
 
         self.markers_publisher.publish(marker_array)
         
 
     def waypoint_callback(self, msg):
         msg_array = np.array(msg.data)
-        self.waypoints = msg_array.reshape(2, int(msg_array.size/2), order='F').tolist()
+        self.get_logger().info("Recieved Waypoints {0}".format(msg.data))
+        self.waypoints = msg_array.reshape(int(msg_array.size/2), 2).tolist()
             
     def landmark_callback(self, msg):
         msg_array = np.array(msg.data)
-        self.landmarks = msg_array.reshape(2, int(msg_array.size/2), order='F').tolist()
+        self.landmarks = msg_array.reshape(int(msg_array.size/2), 2).tolist()
 
     def create_marker_msg(self, id, x, y, rgb=[0.0, 1.0, 0.0]):
         marker = Marker()
@@ -74,6 +75,7 @@ class MarkerManager(Node):
         msg_array = []
 
         for index, value in enumerate(array):
+            self.get_logger().info("Recieved {0}".format(value))
 
             if type == 'waypoint':
                 rgb = [0.0, 1.0, 0.0]
