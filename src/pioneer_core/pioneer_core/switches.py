@@ -15,8 +15,8 @@ class Switches(Node):
     def __init__(self):
         super().__init__('switches')
 
-        self.joy_buttons = []
-        self.joy_axes = []
+        self.joy_buttons = [0,0]
+        self.joy_buttons_last = [0,0]
 
         self.autonomous_lock = True
         self.manual_lock = True
@@ -28,25 +28,34 @@ class Switches(Node):
         self.man_lock_publisher = self.create_publisher(Bool, '/pause_man', 10)
         self.nav_lock_publisher = self.create_publisher(Bool, '/pause_nav', 10)
 
-        self.interlocking_timer = self.create_timer(1, self.timer_callback)
+        self.interlocking_timer = self.create_timer(0.1, self.timer_callback)
 
 
     def timer_callback(self):
 
-        if self.joy_buttons[BUTTON_CROSS]:
-            self.autonomous_lock = not self.autonomous_lock
-            self.autonomous_lock_publisher.publish(self.autonomous_lock)
-        
-        if self.joy_buttons[BUTTON_CIRCLE]:
-            self.manual_lock = not self.autonomous_lock
-            self.man_lock_publisher.publish(self.manual_lock)
+        bool = Bool()
 
-        self.get_logger().info("Current LOCK status \n Autonomous: {0} \n Manual: {1}".format(self.autonomous_lock, self.manual_lock))
+        if ((self.joy_buttons[BUTTON_CIRCLE] != self.joy_buttons_last[BUTTON_CIRCLE]) 
+            and self.joy_buttons[BUTTON_CIRCLE] == 1):
+
+            self.autonomous_lock = not self.autonomous_lock
+            bool.data = self.autonomous_lock
+            self.nav_lock_publisher.publish(bool)
+
+        if ((self.joy_buttons[BUTTON_CROSS] != self.joy_buttons_last[BUTTON_CROSS]) 
+            and self.joy_buttons[BUTTON_CROSS] == 1):
+        
+            self.manual_lock = not self.manual_lock
+            bool.data = self.manual_lock
+            self.man_lock_publisher.publish(bool)
+
+        self.joy_buttons_last = self.joy_buttons
+
+        self.get_logger().info("\nInterlocking Status: \n Autonomous: {0} \n Manual: {1}".format(self.autonomous_lock, self.manual_lock))
 
 
     def joy_callback(self, msg):
         self.joy_buttons = msg.buttons
-        self.joy_axes = msg.axes
 
 
 def main():

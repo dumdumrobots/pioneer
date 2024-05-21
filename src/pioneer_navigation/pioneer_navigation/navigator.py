@@ -1,78 +1,65 @@
 #! /usr/bin/env python3
 
+import rclpy
+
 from geometry_msgs.msg import PoseStamped
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 
-import rclpy
 from rclpy.duration import Duration
 from rclpy.node import Node
 
-from visualization_msgs.msg import Marker
+from std_msgs.msg import Float64MultiArray
 
 
 class WaypointManager(Node):
     
-    def __init__(self, waypoints):
-
-        self.publisher_dic = {}
-        self.waypoint_dic = {}
+    def __init__(self):
 
         super().__init__('waypoint_manager')
-        self.timer = self.create_timer(0.1, self.timer_callback)
+
+        self.goal_waypoints = []
+        self.goal_poses = []
         
-        for index, waypoint in enumerate(waypoints):
+        gp1, gw1 = self.create_pose(x=1.5, y=0.0, w=0.707, z=0.707)
+        self.goal_poses.append(gp1)
+        self.goal_waypoints.append(gw1)
 
-            name = 'marker_{0}'.format(index)
-            
-            self.publisher_dic[name] = self.create_publisher(Marker, name, 10)
-            self.waypoint_dic[name] = self.create_marker_msg(index, waypoint[0], waypoint[1])
-            self.get_logger().info("Marker {0} created.".format(name))
+        gp2, gw2 = self.create_pose(x=1.5, y=1.5, w=0, z=1)
+        self.goal_poses.append(gp1)
+        self.goal_waypoints.append(gw1)
 
+        gp3, gw3 = self.create_pose(x=0.0, y=1.5, w=0.707, z=-0.707)
+        self.goal_poses.append(gp1)
+        self.goal_waypoints.append(gw1)
 
-    def timer_callback(self):
-        for name in self.waypoint_dic:
-            self.publisher_dic[name].publish(self.waypoint_dic[name])
+        gp4, gw4 = self.create_pose(x=1.5, y=0.0, w=0.707, z=0.707)
+        self.goal_poses.append(gp1)
+        self.goal_waypoints.append(gw1)
 
-    def create_marker_msg(self, id, x, y):
-        
-        name = 'marker_{0}'.format(id)
+        self.publish_timer = self.create_timer(0.1, self.publish_timer_callback)
 
-        marker = Marker()
-        marker.header.frame_id = '/map'
-        marker.header.stamp = self.get_clock().now().to_msg()
-        marker.type = marker.CUBE
-        marker.id = id
-        marker.action = marker.ADD
+        self.waypoint_publisher = self.create_publisher(Float64MultiArray, '/nav_waypoints', 10)
 
-        marker.scale.x = 0.05
-        marker.scale.y = 0.05
-        marker.scale.z = 0.3
+    def publish_timer_callback(self):
+        msg = Float64MultiArray()
+        msg.data = self.goal_waypoints
 
-        marker.color.r = 0.0
-        marker.color.g = 1.0
-        marker.color.b = 0.0
-        marker.color.a = 1.0
-
-        marker.pose.position.x = x
-        marker.pose.position.y = y
-        marker.pose.position.z = 0.15
-        
-        return marker
+        self.waypoint_publisher.publish(msg)
 
 
-def create_pose(navigator, x,y,w,z):
+    def create_pose(self, x,y,w,z):
 
-    pose = PoseStamped()
-    pose.header.frame_id = 'map'
-    pose.header.stamp = navigator.get_clock().now().to_msg()
-    pose.pose.position.x = x
-    pose.pose.position.y = y
-    pose.pose.orientation.w = w
-    pose.pose.orientation.z = z
+        pose = PoseStamped()
+        pose.header.frame_id = 'map'
+        pose.header.stamp = self.get_clock().now().to_msg()
+        pose.pose.position.x = x
+        pose.pose.position.y = y
+        pose.pose.orientation.w = w
+        pose.pose.orientation.z = z
 
-    waypoint = [x,y]
+        waypoint = [x,y]
 
-    return pose, waypoint
+        return pose, waypoint
 
 
 def main():
@@ -80,32 +67,14 @@ def main():
 
     navigator = BasicNavigator()
 
-    initial_pose, initial_waypoint = create_pose(navigator=navigator,x=0.0,y=0.0,w=1.0,z=0.0)
+    initial_pose, initial_waypoint = manager.create_pose(navigator=navigator,x=0.0,y=0.0,w=1.0,z=0.0)
     navigator.setInitialPose(initial_pose)
 
-    # set our demo's goal poses
-    goal_waypoints = []
-    goal_poses = []
-
-    goal_pose1, goal_waypoint1 = create_pose(navigator=navigator,x=1.5,y=0.0,w=0.707,z=0.707)
-    goal_poses.append(goal_pose1)
-    goal_waypoints.append(goal_waypoint1)
-
-    '''
-    goal_pose2, goal_waypoint2 = create_pose(navigator=navigator,x=1.5,y=1.5,w=0,z=1)
-    goal_poses.append(goal_pose2)
-    goal_waypoints.append(goal_waypoint2)
-
-    goal_pose3, goal_waypoint3 = create_pose(navigator=navigator,x=0.0,y=1.5,w=0.707,z=-0.707)
-    goal_poses.append(goal_pose3)
-    goal_waypoints.append(goal_waypoint3)
-
-    goal_poses.append(goal_pose1)
-    goal_waypoints.append(goal_waypoint1)
-
-    '''
-
     manager = WaypointManager(waypoints=goal_waypoints)
+
+    goal_waypoints = manager.goal_waypoints
+    goal_poses = manager.goal_poses
+    
     rclpy.spin_once(manager)
     
     navigator.goThroughPoses(goal_poses)
