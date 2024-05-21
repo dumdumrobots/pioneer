@@ -33,7 +33,7 @@ class MarkerManager(Node):
         marker_array = MarkerArray()
         marker_array.markers = self.waypoint_markers + self.landmark_markers
 
-        self.get_logger().info("Publishing Marker Array {0}".format(marker_array))
+        #self.get_logger().info("Publishing Marker Array {0}".format(marker_array))
 
         self.markers_publisher.publish(marker_array)
         
@@ -101,7 +101,6 @@ def main(args=None):
     waypoints.append(w4)
 
     manager = MarkerManager()
-
     manager.waypoints = waypoints
     
     rclpy.spin(manager)

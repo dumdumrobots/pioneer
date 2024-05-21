@@ -45,9 +45,14 @@ def generate_launch_description():
                     ),
         ]
     )
-    
+
+    markers_node = Node(
+        package='pioneer_navigation',
+        executable='markers',
+    )
 
     return LaunchDescription([
         slam_node,
+        markers_node,
         nav_include,
     ])

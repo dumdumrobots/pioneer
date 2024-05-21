@@ -7,7 +7,8 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, GroupAction
+from launch_ros.actions import SetRemap
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import PathJoinSubstitution, TextSubstitution
 
@@ -85,23 +86,30 @@ def generate_launch_description():
                 }.items(),
             )
     
-    camera_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('depthai_ros_driver'), 
-            'launch'),'/camera.launch.py']),
+    camera_include = GroupAction(
+        actions=[
 
-            launch_arguments={
-                'use_rviz': 'false',
-                'parent_frame' : 'camera_link',
-                }.items(),
-            )
+            SetRemap(src='/robot_description',dst='/camera/robot_description'),
+
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory('depthai_ros_driver'), 
+                    'launch'),'/camera.launch.py']),
+                    
+                    launch_arguments={
+                        'use_rviz': 'false',
+                        'parent_frame' : 'camera_link',
+                        }.items(),
+            ),
+        ]
+    )
     
 
     return LaunchDescription([
         imu_launch,
         teleop_launch,
-        camera_launch,
         twist_mux_launch,
+        camera_include,
         int_odom_node,
         lidar_node,
         aria_node,
