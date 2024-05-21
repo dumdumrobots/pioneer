@@ -5,6 +5,7 @@ from rclpy.node import Node
 from visualization_msgs.msg import Marker, MarkerArray
 from std_msgs.msg import Float64MultiArray
 
+import numpy as np
 
 class MarkerManager(Node):
     
@@ -27,8 +28,8 @@ class MarkerManager(Node):
 
     def publish_timer_callback(self):
 
-        self.waypoint_markers = self.create_marker_array(self.waypoints)
-        self.landmark_markers = self.create_marker_array(self.landmarks)
+        self.waypoint_markers = self.create_marker_array(self.waypoints, type='waypoint')
+        self.landmark_markers = self.create_marker_array(self.landmarks, type='landmark')
 
         marker_array = MarkerArray()
         marker_array.markers = self.waypoint_markers + self.landmark_markers
@@ -39,10 +40,12 @@ class MarkerManager(Node):
         
 
     def waypoint_callback(self, msg):
-        self.waypoints = msg.data
+        msg_array = np.array(msg.data)
+        self.waypoints = msg_array.reshape(2, int(msg_array.size/2), order='F').tolist()
             
     def landmark_callback(self, msg):
-        self.landmarks = msg.data
+        msg_array = np.array(msg.data)
+        self.landmarks = msg_array.reshape(2, int(msg_array.size/2), order='F').tolist()
 
     def create_marker_msg(self, id, x, y, rgb=[0.0, 1.0, 0.0]):
         marker = Marker()
@@ -68,7 +71,7 @@ class MarkerManager(Node):
         return marker
     
     def create_marker_array(self, array, type='waypoint'):
-        tmp_array = []
+        msg_array = []
 
         for index, value in enumerate(array):
 
@@ -80,9 +83,9 @@ class MarkerManager(Node):
                 rgb = [1.0, 0.0, 0.0]
                 marker = self.create_marker_msg(index + 10, value[0], value[1], rgb)
 
-            tmp_array.append(marker)
+            msg_array.append(marker)
 
-        return tmp_array
+        return msg_array
     
 
 def main(args=None):

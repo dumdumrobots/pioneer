@@ -10,6 +10,8 @@ from rclpy.node import Node
 
 from std_msgs.msg import Float64MultiArray
 
+import numpy as np
+
 
 class WaypointManager(Node):
     
@@ -43,8 +45,13 @@ class WaypointManager(Node):
         self.waypoint_publisher = self.create_publisher(Float64MultiArray, '/nav_waypoints', 10)
 
     def publish_timer_callback(self):
+
+        self.get_logger().info("Publishing Waypoint Array {0}".format(self.goal_waypoints))
+
+        msg_array = np.array(self.goal_waypoints)
+
         msg = Float64MultiArray()
-        msg.data = self.goal_waypoints
+        msg.data = msg_array.reshape(int(msg_array.size)).tolist()
 
         self.waypoint_publisher.publish(msg)
 
@@ -68,8 +75,7 @@ def main():
     rclpy.init()
 
     navigator = BasicNavigator()
-
-    manager = WaypointManager(waypoints=goal_waypoints)
+    manager = WaypointManager()
 
     initial_pose, initial_waypoint = manager.create_pose(x=0.0,y=0.0,w=1.0,z=0.0)
     navigator.setInitialPose(initial_pose)
@@ -79,7 +85,8 @@ def main():
     
     rclpy.spin_once(manager)
     
-    navigator.goThroughPoses(goal_poses)
+    #navigator.goThroughPoses(goal_poses)
+    navigator.goToPose(goal_poses[0])
 
     i = 0
     while not navigator.isTaskComplete():
