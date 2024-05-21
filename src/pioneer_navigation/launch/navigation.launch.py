@@ -21,7 +21,6 @@ def generate_launch_description():
         package='slam_toolbox',
         executable='async_slam_toolbox_node',
         parameters=[pioneer_pkg + '/config/mapping.yaml'],
-        output='screen',
     )
 
     nav2_params = os.path.join(

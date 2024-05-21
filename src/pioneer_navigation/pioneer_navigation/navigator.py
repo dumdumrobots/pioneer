@@ -2,9 +2,62 @@
 
 from geometry_msgs.msg import PoseStamped
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
+
 import rclpy
 from rclpy.duration import Duration
-from marker import WaypointManager
+from rclpy.node import Node
+
+from visualization_msgs.msg import Marker
+
+
+class WaypointManager(Node):
+    
+    def __init__(self, waypoints):
+
+        self.publisher_dic = {}
+        self.waypoint_dic = {}
+
+        super().__init__('waypoint_manager')
+        self.timer = self.create_timer(0.1, self.timer_callback)
+        
+        for index, waypoint in enumerate(waypoints):
+
+            name = 'marker_{0}'.format(index)
+            
+            self.publisher_dic[name] = self.create_publisher(Marker, name, 10)
+            self.waypoint_dic[name] = self.create_marker_msg(index, waypoint[0], waypoint[1])
+            self.get_logger().info("Marker {0} created.".format(name))
+
+
+    def timer_callback(self):
+        for name in self.waypoint_dic:
+            self.publisher_dic[name].publish(self.waypoint_dic[name])
+
+    def create_marker_msg(self, id, x, y):
+        
+        name = 'marker_{0}'.format(id)
+
+        marker = Marker()
+        marker.header.frame_id = '/map'
+        marker.header.stamp = self.get_clock().now().to_msg()
+        marker.type = marker.CUBE
+        marker.id = id
+        marker.action = marker.ADD
+
+        marker.scale.x = 0.05
+        marker.scale.y = 0.05
+        marker.scale.z = 0.3
+
+        marker.color.r = 0.0
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+        marker.color.a = 1.0
+
+        marker.pose.position.x = x
+        marker.pose.position.y = y
+        marker.pose.position.z = 0.15
+        
+        return marker
 
 
 def create_pose(navigator, x,y,w,z):
@@ -27,8 +80,7 @@ def main():
 
     navigator = BasicNavigator()
 
-    initial_pose = create_pose(navigator=navigator,x=0.0,y=0.0,w=1.0,z=0.0)
-
+    initial_pose, initial_waypoint = create_pose(navigator=navigator,x=0.0,y=0.0,w=1.0,z=0.0)
     navigator.setInitialPose(initial_pose)
 
     # set our demo's goal poses
@@ -39,6 +91,7 @@ def main():
     goal_poses.append(goal_pose1)
     goal_waypoints.append(goal_waypoint1)
 
+    '''
     goal_pose2, goal_waypoint2 = create_pose(navigator=navigator,x=1.5,y=1.5,w=0,z=1)
     goal_poses.append(goal_pose2)
     goal_waypoints.append(goal_waypoint2)
@@ -50,21 +103,21 @@ def main():
     goal_poses.append(goal_pose1)
     goal_waypoints.append(goal_waypoint1)
 
+    '''
+
     manager = WaypointManager(waypoints=goal_waypoints)
+    rclpy.spin_once(manager)
     
     navigator.goThroughPoses(goal_poses)
 
     i = 0
     while not navigator.isTaskComplete():
-        ################################################
-        #
-        # Implement some code here for your application!
-        #
-        ################################################
 
-        # Do something with the feedback
+        rclpy.spin_once(manager)
+
         i = i + 1
         feedback = navigator.getFeedback()
+
         if feedback and i % 5 == 0:
             print(
                 'Estimated time of arrival: '
