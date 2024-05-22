@@ -8,8 +8,8 @@ from sensor_msgs.msg import Joy
 BUTTON_CROSS = 0
 BUTTON_CIRCLE = 1
 
-AXIS_TRIGGER_LEFT = 4
-AXIS_TRIGGER_RIGHT = 5
+AXIS_TRIGGER_LEFT = 6
+AXIS_TRIGGER_RIGHT = 7
 
 class Switches(Node):
 
@@ -38,16 +38,15 @@ class Switches(Node):
 
         bool = Bool()
 
+        if self.joy_buttons[AXIS_TRIGGER_LEFT] == 1:
+            self.dead_trigger = False
+        else:
+            self.dead_trigger = True
+
         if ((self.joy_buttons[BUTTON_CIRCLE] != self.joy_buttons_last[BUTTON_CIRCLE]) 
             and self.joy_buttons[BUTTON_CIRCLE] == 1):
 
             self.autonomous_lock = not self.autonomous_lock
-
-            if self.joy_buttons[AXIS_TRIGGER_LEFT] == 1:
-                self.dead_trigger = False
-            else:
-                self.dead_trigger = True
-
             bool.data = self.autonomous_lock or self.dead_trigger
             self.nav_lock_publisher.publish(bool)
 
