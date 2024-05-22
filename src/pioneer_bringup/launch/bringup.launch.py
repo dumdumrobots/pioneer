@@ -55,37 +55,8 @@ def generate_launch_description():
             get_package_share_directory('phidgets_spatial'), 
             'launch'),'/spatial-launch.py']),
             )
-
-    teleop_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('pioneer_teleop'), 
-            'launch'),'/teleop.launch.py']),
-            )
     
-    config_topics = os.path.join(
-        get_package_share_directory('pioneer_bringup'),
-        'config',
-        'topics.yaml'
-        )
-    
-    config_locks = os.path.join(
-        get_package_share_directory('pioneer_bringup'),
-        'config',
-        'locks.yaml'
-        )
-    
-    twist_mux_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('twist_mux'), 
-            'launch'),'/twist_mux_launch.py']),
-
-            launch_arguments={
-                'config_topics': config_topics,
-                'config_locks': config_locks,
-                'cmd_vel_out': '/cmd_vel',
-                }.items(),
-            )
-    
+       
     camera_include = GroupAction(
         actions=[
 
@@ -103,12 +74,10 @@ def generate_launch_description():
             ),
         ]
     )
-    
+
 
     return LaunchDescription([
         imu_launch,
-        teleop_launch,
-        twist_mux_launch,
         camera_include,
         int_odom_node,
         lidar_node,

@@ -19,6 +19,19 @@ def generate_launch_description():
         'config',
         'ps4.config.yaml'
         )
+    
+    config_topics = os.path.join(
+        get_package_share_directory('pioneer_teleop'),
+        'config',
+        'topics.yaml'
+        )
+    
+    config_locks = os.path.join(
+        get_package_share_directory('pioneer_teleop'),
+        'config',
+        'locks.yaml'
+        )
+    
 
     teleop_twist_joy = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
@@ -31,9 +44,32 @@ def generate_launch_description():
                 'config_filepath' : config,
                 }.items(),
             )
+    
+    
+    twist_mux_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('twist_mux'), 
+            'launch'),'/twist_mux_launch.py']),
 
+            launch_arguments={
+                'config_topics': config_topics,
+                'config_locks': config_locks,
+                'cmd_vel_out': '/cmd_vel',
+                }.items(),
+            )
+    
+
+    switches_node = Node(
+        package='pioneer_teleop',
+        executable='switches',
+        name='switches_node',
+        output='screen',
+    )
 
     return LaunchDescription([
+        switches_node,
         teleop_twist_joy,
+        twist_mux_launch,
+        
     ])
 

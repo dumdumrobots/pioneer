@@ -7,6 +7,7 @@ from sensor_msgs.msg import Joy
 
 BUTTON_CROSS = 0
 BUTTON_CIRCLE = 1
+
 AXIS_TRIGGER_LEFT = 4
 AXIS_TRIGGER_RIGHT = 5
 
@@ -20,6 +21,8 @@ class Switches(Node):
 
         self.autonomous_lock = True
         self.manual_lock = True
+
+        self.dead_trigger = True
 
         self.get_logger().info("Current lock status \n Autonomous: {0} \n Manual: {1}".format(self.autonomous_lock, self.manual_lock))
         
@@ -39,7 +42,13 @@ class Switches(Node):
             and self.joy_buttons[BUTTON_CIRCLE] == 1):
 
             self.autonomous_lock = not self.autonomous_lock
-            bool.data = self.autonomous_lock
+
+            if self.joy_buttons[AXIS_TRIGGER_LEFT] == 1:
+                self.dead_trigger = False
+            else:
+                self.dead_trigger = True
+
+            bool.data = self.autonomous_lock or self.dead_trigger
             self.nav_lock_publisher.publish(bool)
 
         if ((self.joy_buttons[BUTTON_CROSS] != self.joy_buttons_last[BUTTON_CROSS]) 
@@ -51,7 +60,7 @@ class Switches(Node):
 
         self.joy_buttons_last = self.joy_buttons
 
-        self.get_logger().info("\nInterlocking Status: \n Autonomous: {0} \n Manual: {1}".format(self.autonomous_lock, self.manual_lock))
+        self.get_logger().info("Interlocking Status: \nAutonomous: {0} \nDead Trigger: {1} \nManual: {2}".format(self.autonomous_lock, self.dead_trigger, self.manual_lock))
 
 
     def joy_callback(self, msg):

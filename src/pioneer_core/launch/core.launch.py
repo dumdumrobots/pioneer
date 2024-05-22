@@ -14,14 +14,12 @@ from launch.substitutions import PathJoinSubstitution, TextSubstitution
 
 def generate_launch_description():
 
-    switches_node = Node(
-        package='pioneer_core',
-        executable='switches',
-        name='switches_node',
-        output='screen',
-    )
-    
+    teleop_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('pioneer_teleop'), 
+            'launch'),'/teleop.launch.py']),
+            )
 
     return LaunchDescription([
-        switches_node,
+        teleop_launch,
     ])

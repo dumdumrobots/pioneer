@@ -31,6 +31,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'switches = pioneer_teleop.switches:main',
         ],
     },
 )
