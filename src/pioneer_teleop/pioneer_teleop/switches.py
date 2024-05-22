@@ -61,7 +61,7 @@ class Switches(Node):
 
         self.joy_buttons_last = self.joy_buttons
 
-        self.get_logger().info("Interlocking Status: \nAutonomous: {0} \nDead Trigger: {1} \nManual: {2}".format(self.autonomous_lock, self.dead_trigger, self.manual_lock))
+        self.get_logger().info("Interlocking Status: \nAutonomous: {0} \nDeadman Trigger: {1} \nManual: {2}".format(self.autonomous_lock, self.dead_trigger, self.manual_lock))
 
 
     def joy_callback(self, msg):
