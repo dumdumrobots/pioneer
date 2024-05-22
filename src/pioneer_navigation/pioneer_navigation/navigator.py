@@ -56,7 +56,7 @@ class WaypointManager(Node):
 
         self.current_state = self.waypoint_manager_states[0]
 
-        self.get_logger().info("Navigator initial {0} state.\n".format(self.current_state))
+        self.get_logger().info("Enterint Navigator initial {0} state.\n".format(self.current_state))
 
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
