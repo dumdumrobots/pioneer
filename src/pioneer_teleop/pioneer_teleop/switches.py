@@ -16,8 +16,8 @@ class Switches(Node):
     def __init__(self):
         super().__init__('switches')
 
-        self.joy_buttons = [0,0]
-        self.joy_buttons_last = [0,0]
+        self.joy_buttons = [0,0,0,0,0,0,0,0,0]
+        self.joy_buttons_last = [0,0,0,0,0,0,0,0,0]
 
         self.autonomous_lock = True
         self.manual_lock = True
@@ -36,7 +36,8 @@ class Switches(Node):
 
     def timer_callback(self):
 
-        bool = Bool()
+        bool_man = Bool()
+        bool_nav = Bool()
 
         if self.joy_buttons[AXIS_TRIGGER_LEFT] == 1:
             self.dead_trigger = False
@@ -45,17 +46,18 @@ class Switches(Node):
 
         if ((self.joy_buttons[BUTTON_CIRCLE] != self.joy_buttons_last[BUTTON_CIRCLE]) 
             and self.joy_buttons[BUTTON_CIRCLE] == 1):
-
             self.autonomous_lock = not self.autonomous_lock
-            bool.data = self.autonomous_lock or self.dead_trigger
-            self.nav_lock_publisher.publish(bool)
-
+            
+            
         if ((self.joy_buttons[BUTTON_CROSS] != self.joy_buttons_last[BUTTON_CROSS]) 
             and self.joy_buttons[BUTTON_CROSS] == 1):
-        
             self.manual_lock = not self.manual_lock
-            bool.data = self.manual_lock
-            self.man_lock_publisher.publish(bool)
+
+        bool_nav.data = self.autonomous_lock or self.dead_trigger
+        bool_man.data = self.manual_lock
+            
+        self.nav_lock_publisher.publish(bool_nav)
+        self.man_lock_publisher.publish(bool_man)
 
         self.joy_buttons_last = self.joy_buttons
 
