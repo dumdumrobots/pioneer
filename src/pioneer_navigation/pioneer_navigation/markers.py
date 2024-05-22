@@ -75,7 +75,7 @@ class MarkerManager(Node):
         msg_array = []
 
         for index, value in enumerate(array):
-            self.get_logger().info("Recieved {0}".format(value))
+            #self.get_logger().info("Recieved {0}".format(value))
 
             if type == 'waypoint':
                 rgb = [0.0, 1.0, 0.0]

@@ -22,7 +22,7 @@ class WaypointManager(Node):
         self.goal_waypoints = []
         self.goal_poses = []
         
-        gp1, gw1 = self.create_pose(x=-0.5, y=0.0, w=0.0, z=1.0)
+        gp1, gw1 = self.create_pose(x=1, y=0.0, w=0.0, z=1.0)
         self.goal_poses.append(gp1)
         self.goal_waypoints.append(gw1)
 
