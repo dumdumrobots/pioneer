@@ -437,16 +437,24 @@ def detectAll(frame):
     objects_detected = []
     
     #detect yellow cones
-    objects_detected.append(detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow))
+    object_ = detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow)
+    if object_:
+        objects_detected.append(object_)
     
     #detect red bins
-    objects_detected.append(detectRedBins(frame,image_divide_redBin,lower1_redBin,upper1_redBin,lower2_redBin,upper2_redBin,array_detectedAll_4points, array_detectedAll_centerXYwh))
+    object_ = detectRedBins(frame,image_divide_redBin,lower1_redBin,upper1_redBin,lower2_redBin,upper2_redBin,array_detectedAll_4points, array_detectedAll_centerXYwh)
+    if object_:
+    objects_detected.append(object_)
     
     #detectTallCones
-    objects_detected.append(detectTallCones(frame,image_divide_TallCone,lower1_TallCone,upper1_TallCone,lower2_TallCone,upper2_TallCone,array_detectedAll_4points, array_detectedAll_centerXYwh))
+    object_ = detectTallCones(frame,image_divide_TallCone,lower1_TallCone,upper1_TallCone,lower2_TallCone,upper2_TallCone,array_detectedAll_4points, array_detectedAll_centerXYwh)
+    if object_
+    objects_detected.append(object_)
     
     # #detect little orange cones
-    objects_detected.append(detectRedLittleCones(frame,image_divide_redLittleCone,lower1_littleOrange,upper1_littleOrange,lower2_littleOrange,upper2_littleOrange,array_detectedAll_4points, array_detectedAll_centerXYwh))
+    object_ = detectRedLittleCones(frame,image_divide_redLittleCone,lower1_littleOrange,upper1_littleOrange,lower2_littleOrange,upper2_littleOrange,array_detectedAll_4points, array_detectedAll_centerXYwh)
+    if object_:
+        objects_detected.append(object_)
 
     return objects_detected
 
