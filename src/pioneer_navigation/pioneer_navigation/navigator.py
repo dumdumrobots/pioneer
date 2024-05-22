@@ -3,6 +3,9 @@
 import rclpy
 
 from geometry_msgs.msg import PoseStamped
+from nav_msgs.msg import Odometry
+from sensor_msgs.msg import Joy
+
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 
 from rclpy.duration import Duration
@@ -12,6 +15,8 @@ from std_msgs.msg import Float64MultiArray
 
 import numpy as np
 
+BUTTON_TRIANGLE = 2
+BUTTON_SQUARE = 3
 
 class WaypointManager(Node):
     
@@ -19,47 +24,60 @@ class WaypointManager(Node):
 
         super().__init__('waypoint_manager')
 
+        self.joy_buttons = [0,0,0,0,0,0,0,0,0]
+        self.joy_buttons_last = [0,0,0,0,0,0,0,0,0]
+
         self.goal_waypoints = []
         self.goal_poses = []
+
+        self.robot_pose, self.robot_position = self.create_pose(x= 0.0,y= 0.0,w= 1.0,z= 0.0)
+
+        self.joy_subscriber = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
+        self.odom_subscriber = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+
+        self.publisher_timer = self.create_timer(0.1, self.publisher_timer_callback)
         
-        gp1, gw1 = self.create_pose(x=1.0, y=0.0, w=1.0, z=0.0)
-        self.goal_poses.append(gp1)
-        self.goal_waypoints.append(gw1)
-
-        '''
-        gp2, gw2 = self.create_pose(x=1.5, y=1.5, w=0, z=1)
-        self.goal_poses.append(gp1)
-        self.goal_waypoints.append(gw1)
-
-        gp3, gw3 = self.create_pose(x=0.0, y=1.5, w=0.707, z=-0.707)
-        self.goal_poses.append(gp1)
-        self.goal_waypoints.append(gw1)
-
-        gp4, gw4 = self.create_pose(x=1.5, y=0.0, w=0.707, z=0.707)
-        self.goal_poses.append(gp1)
-        self.goal_waypoints.append(gw1)
-        '''
-
-        self.publish_timer = self.create_timer(0.1, self.publish_timer_callback)
+        self.recording_timer = self.create_timer(0.1, self.recording_timer_callback)
 
         self.waypoint_publisher = self.create_publisher(Float64MultiArray, '/nav_waypoints', 10)
 
-    def publish_timer_callback(self):
+
+    def recording_timer_callback(self):
+
+        if ((self.joy_buttons[BUTTON_SQUARE] != self.joy_buttons_last[BUTTON_SQUARE]) 
+            and self.joy_buttons[BUTTON_SQUARE] == 1):
+
+            self.goal_poses.append(self.robot_pose)
+            self.goal_waypoints.append(self.robot_position)
+
+            self.get_logger().info("Waypoint Added: {0}".format(self.robot_position))
+
+        self.joy_buttons_last = self.joy_buttons
+
+
+    def publisher_timer_callback(self):
 
         msg_array = np.array(self.goal_waypoints)
 
         msg = Float64MultiArray()
         msg.data = msg_array.reshape(int(msg_array.size)).tolist()
 
-        #self.get_logger().info("Publishing Waypoint Array: {0}".format(msg_array.reshape(int(msg_array.size)).tolist()))
-
         self.waypoint_publisher.publish(msg)
+
+
+    def joy_callback(self, msg):
+        self.joy_buttons = msg.buttons
+
+
+    def odom_callback(self, msg):
+        self.robot_pose = msg.pose.pose
+        self.robot_position = [msg.pose.pose.point.x, msg.pose.pose.point.y]
 
 
     def create_pose(self, x,y,w,z):
 
         pose = PoseStamped()
-        pose.header.frame_id = 'map'
+        pose.header.frame_id = 'base_footprint'
         pose.header.stamp = self.get_clock().now().to_msg()
         pose.pose.position.x = x
         pose.pose.position.y = y
@@ -69,6 +87,28 @@ class WaypointManager(Node):
         waypoint = [x,y]
 
         return pose, waypoint
+    
+    def create_default_exploration(self):
+        
+        gp1, gw1 = self.create_pose(x= 2.0, y= 0.0, w= 1.0, z= 0.0)
+        self.goal_poses.append(gp1)
+        self.goal_waypoints.append(gw1)
+
+        gp2, gw2 = self.create_pose(x= 2.0, y= 2.0, w= 0.0, z= 1.0)
+        self.goal_poses.append(gp2)
+        self.goal_waypoints.append(gw2)
+
+        gp3, gw3 = self.create_pose(x= 0.0, y= 2.0, w= 0.0, z= 1.0)
+        self.goal_poses.append(gp3)
+        self.goal_waypoints.append(gw3)
+
+        gp4, gw4 = self.create_pose(x= -2.0, y= 2.0, w= 0.0, z= 1.0)
+        self.goal_poses.append(gp4)
+        self.goal_waypoints.append(gw4)
+
+        gp5, gw5 = self.create_pose(x= -2.0, y= 0.0, w= 1.0, z= 0.0)
+        self.goal_poses.append(gp5)
+        self.goal_waypoints.append(gw5)        
 
 
 def main():
@@ -77,14 +117,28 @@ def main():
     navigator = BasicNavigator()
     manager = WaypointManager()
 
-    initial_pose, initial_waypoint = manager.create_pose(x=0.0,y=0.0,w=1.0,z=0.0)
+    initial_pose = manager.robot_pose
+    initial_waypoint = manager.robot_position
     navigator.setInitialPose(initial_pose)
+
+    manager.get_logger().info("Recording Waypoints. Press BUTTON_TRIANGLE to close.")
+
+    while manager.joy_buttons[BUTTON_TRIANGLE] == 0:
+        rclpy.spin_once(manager)
+
+    manager.get_logger().info("Closing recording.")
+
+    if len(manager.goal_waypoints) == 0:
+        manager.create_default_exploration()
+        manager.get_logger().info("Waypoint[] empty. Creating default exploration sequence.")
+        rclpy.spin_once(manager)
+
+    else:
+        manager.get_logger().info("Sending Waypoint[] saved: {0}".format(manager.goal_waypoints))
 
     goal_waypoints = manager.goal_waypoints
     goal_poses = manager.goal_poses
-    
-    rclpy.spin_once(manager)
-    
+
     #navigator.goThroughPoses(goal_poses)
     navigator.goToPose(goal_poses[0])
 

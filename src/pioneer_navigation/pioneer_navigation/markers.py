@@ -50,7 +50,7 @@ class MarkerManager(Node):
 
     def create_marker_msg(self, id, x, y, rgb=[0.0, 1.0, 0.0]):
         marker = Marker()
-        marker.header.frame_id = '/map'
+        marker.header.frame_id = '/base_link'
         marker.header.stamp = self.get_clock().now().to_msg()
         marker.type = marker.CUBE
         marker.id = id
