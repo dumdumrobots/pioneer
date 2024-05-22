@@ -10,3 +10,8 @@ twist_mux:
         topic   : pause_man
         timeout : 0.0
         priority: 150
+
+      stop_all:
+        topic   : stop_all
+        timeout : 0.0
+        priority: 175
