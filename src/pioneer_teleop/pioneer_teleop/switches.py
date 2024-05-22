@@ -4,6 +4,8 @@ import numpy as np
 from rclpy.node import Node
 from std_msgs.msg import Bool
 from sensor_msgs.msg import Joy, LaserScan
+from geometry_msgs.msg import Twist
+
 
 BUTTON_CROSS = 0
 BUTTON_CIRCLE = 1
@@ -22,7 +24,7 @@ class Switches(Node):
         self.autonomous_lock = True
         self.manual_lock = True
 
-        self.dead_trigger = True
+        self.dead_lock = True
         self.lidar_lock = True
 
         self.obstacle_range = 1.0472
@@ -38,6 +40,8 @@ class Switches(Node):
         self.man_lock_publisher = self.create_publisher(Bool, '/pause_man', 10)
         self.nav_lock_publisher = self.create_publisher(Bool, '/pause_nav', 10)
         self.lidar_lock_publisher = self.create_publisher(Bool, '/stop_all', 10)
+
+        self.cmd_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
 
         self.interlocking_timer = self.create_timer(0.1, self.timer_callback)
 
@@ -77,13 +81,26 @@ class Switches(Node):
         bool_nav = Bool()
         bool_lidar = Bool()
 
-        if self.joy_buttons[AXIS_TRIGGER_LEFT] == 1:
-            self.dead_trigger = False
+        stop_cmd = Twist()
+
+        if (self.joy_buttons[AXIS_TRIGGER_LEFT] == 1 and self.autonomous_lock == False):
+            self.dead_lock = False
+
+        elif self.autonomous_lock == False:
+            self.dead_lock = True
+            self.cmd_publisher.publish(stop_cmd)
         else:
-            self.dead_trigger = True
+            self.dead_lock = True
+
+        if self.lidar_lock:
+            self.cmd_publisher.publish(stop_cmd)
 
         if ((self.joy_buttons[BUTTON_CIRCLE] != self.joy_buttons_last[BUTTON_CIRCLE]) 
             and self.joy_buttons[BUTTON_CIRCLE] == 1):
+
+            if self.autonomous_lock == False:
+                self.cmd_publisher.publish(stop_cmd)
+
             self.autonomous_lock = not self.autonomous_lock
             
             
@@ -91,8 +108,8 @@ class Switches(Node):
             and self.joy_buttons[BUTTON_CROSS] == 1):
             self.manual_lock = not self.manual_lock
 
-        bool_nav.data = self.autonomous_lock or self.dead_trigger
-        bool_man.data = self.manual_lock or self.lidar_lock
+        bool_nav.data = self.autonomous_lock
+        bool_man.data = self.manual_lock
         bool_lidar.data = self.lidar_lock
             
         self.nav_lock_publisher.publish(bool_nav)
@@ -101,8 +118,8 @@ class Switches(Node):
 
         self.joy_buttons_last = self.joy_buttons
 
-        self.get_logger().info("Interlocking Status:\nAutonomous: {0} Manual: {1} Deadman Trigger: {2} LiDAR Trigger: {3}\n".format(
-            self.autonomous_lock, self.manual_lock, self.dead_trigger, self.lidar_lock))
+        self.get_logger().info("Locking Status:\nAutonomous: {0} Manual: {1} Deadman: {2} LiDAR: {3}\n".format(
+            self.autonomous_lock, self.manual_lock, self.dead_lock, self.lidar_lock))
 
 
     def joy_callback(self, msg):
