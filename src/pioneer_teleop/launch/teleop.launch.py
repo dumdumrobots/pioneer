@@ -67,8 +67,8 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        #switches_node,
-        #teleop_twist_joy,
+        switches_node,
+        teleop_twist_joy,
         twist_mux_launch,
         
     ])
