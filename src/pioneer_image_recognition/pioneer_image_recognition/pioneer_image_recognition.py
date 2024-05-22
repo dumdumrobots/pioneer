@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 
 from sensor_msgs.msg import Image
+from std_msgs.msg import String
 # from geometry_msgs.msg import Pose
 
 from cv_bridge import CvBridge
@@ -9,10 +10,7 @@ from cv_bridge import CvBridge
 import cv2
 import torch
 import torchvision.transforms as transforms
-<<<<<<< HEAD
-=======
 
->>>>>>> 40ac2264 (Added venv with pre installed packages for image processing)
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -29,11 +27,7 @@ class Colour:
         self.colour = colour
         self.size = size
         self.location = location
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 40ac2264 (Added venv with pre installed packages for image processing)
 
 class Pioneer(nn.Module):
     def __init__(self):
@@ -116,12 +110,8 @@ class PioneerTrainer:
         }
         torch.save(checkpoint, self.checkpoint_path)
         print("Checkpoint saved.")
-<<<<<<< HEAD
- 
-=======
 
 
->>>>>>> 40ac2264 (Added venv with pre installed packages for image processing)
 
 class DigitRecogniser:
     def __init__(self, model_path='pioneer_checkpoint_v2.pth'):
@@ -177,11 +167,7 @@ class DigitRecogniser:
         
         for cnt in contours:
             area = cv2.contourArea(cnt)
-<<<<<<< HEAD
-            if area > 1000: 
-=======
             if area > 5000: 
->>>>>>> 40ac2264 (Added venv with pre installed packages for image processing)
                 x, y, w, h = cv2.boundingRect(cnt)
                 
                 # Expand the bounding box
@@ -198,11 +184,7 @@ class DigitRecogniser:
                 
                 # Check if the contour is on a white A4 paper
                 mean_color = cv2.mean(image[y:y+h, x:x+w])
-<<<<<<< HEAD
-                if mean_color[0] > 160 and mean_color[1] > 160 and mean_color[2] > 160:
-=======
                 if mean_color[0] > 150 and mean_color[1] > 150 and mean_color[2] > 150:
->>>>>>> 40ac2264 (Added venv with pre installed packages for image processing)
                     digit_ROIs.append((x, y, w, h))
         return digit_ROIs
 
@@ -213,11 +195,7 @@ class DigitRecogniser:
         for x, y, w, h in digit_ROIs:
             ROI = frame[y:y+h, x:x+w]
             predicted_digit, confidence = self.predict_digit(self.preprocess_image(ROI))
-<<<<<<< HEAD
-            if confidence > MIN_CONFIDENCE:
-=======
             if confidence > 80:
->>>>>>> 40ac2264 (Added venv with pre installed packages for image processing)
                 digits.append((predicted_digit, w * h))
                 
         return digits
@@ -230,12 +208,13 @@ class Pioneer_Image_Recognition(Node):
         super().__init__('pioneer_image_recognition')
         self.subscription = self.create_subscription(Image, '/oak/stereo/image_raw', self.image_cb, 10)
         # self.subscription = self.create_subscription(Pose, '/odom', self.pose_cb, 10)
-        self.publisher_ = self.create_publisher(Number, '/number_recog', 10)
+        self.publisher_ = self.create_publisher(String, '/number_recog', 10)
         # self.publisher_ = self.create_publisher(Colour, '/colour_recog', 10)
 
 
     def image_cb(self, msg):
         self.image = msg.data
+        str_msg = String()
 
         digit_recogniser = DigitRecogniser()
         bridge = CvBridge()
@@ -243,14 +222,12 @@ class Pioneer_Image_Recognition(Node):
         cv_image = bridge.imgmsg_to_cv2(self.image, desired_encoding='passthrough')
 
         digits = digit_recogniser.process_frame(cv_image)
+        
 
         for digit in digits:
-            number = Number(digit[0], digit[1]) # Number, Size, Pose
-            self.publisher_.publish(number)
-
-
-    # def pose_cb(self, msg):
-    #     self.pose = msg.position
+            str_msg_msg = "{},{}".format(digit[0], digit[1])# Number, Size, Pose
+            str_msg.data = str_msg_msg
+            self.publisher_.publish(str_msg)
 
 
 def main():
