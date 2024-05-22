@@ -77,7 +77,7 @@ class WaypointManager(Node):
             if ((self.joy_buttons[BUTTON_TRIANGLE] != self.joy_buttons_last[BUTTON_TRIANGLE]) 
                 and self.joy_buttons[BUTTON_TRIANGLE] == 1):
 
-                if len(self.navigator.goal_waypoints) == 0:
+                if len(self.goal_waypoints) == 0:
                     self.create_default_exploration()
                     self.get_logger().info("Waypoint[] empty. Creating default exploration sequence.\n")
 
@@ -118,10 +118,7 @@ class WaypointManager(Node):
             if self.navigator.isTaskComplete() == False:
                 feedback = self.navigator.getFeedback()
 
-                'Executing current waypoint: '
-                + str(feedback.current_waypoint + 1)
-                + '/'
-                + str(len(self.goal_poses))
+                self.get_logger().info("Executing current waypoint: {0} state.\n".format(feedback.current_waypoint + 1, len(self.goal_poses)))
 
             else:
                 self.current_state = self.waypoint_manager_states[4]
