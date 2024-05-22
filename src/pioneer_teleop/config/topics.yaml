@@ -9,4 +9,4 @@ twist_mux:
       joystick:
         topic   : cmd_vel_joy
         timeout : 0.0
-        priority: 125
+        priority: 150
