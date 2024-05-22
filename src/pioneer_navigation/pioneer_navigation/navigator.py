@@ -154,7 +154,7 @@ def main():
     goal_waypoints = manager.goal_waypoints
     goal_poses = manager.goal_poses
 
-    navigator.goThroughPoses(goal_poses)
+    navigator.followWaypoints(goal_poses)
     #navigator.goToPose(goal_poses[0])
 
     i = 0

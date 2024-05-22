@@ -209,6 +209,7 @@ local_costmap:
         observation_sources: scan
         scan:
           topic: /scan
+          # cloud
           max_obstacle_height: 2.0
           clearing: True
           marking: True
