@@ -2,7 +2,7 @@
 services:
   pioneer:
     build: .
-    image: pioneer:latest
+    image: pioneer_joaquin:latest
     container_name: pioneer
     network_mode: "host"
     user: ros

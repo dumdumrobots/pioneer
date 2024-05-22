@@ -11,26 +11,6 @@ BUTTON_CIRCLE = 1
 AXIS_TRIGGER_LEFT = 6
 AXIS_TRIGGER_RIGHT = 7
 
-class LiDAR(Node):
-    def __init__(self, laser_msg):
-        self.obstacle_range = 1.0472
-        self.data = np.array(laser_msg.ranges)
-
-        self.start_angle = -self.obstacle_range/2
-        self.end_angle = self.obstacle_range/2
-
-        self.increment = laser_msg.angle_increment
-
-        self.start_index = int((self.start_angle - -self.obstacle_range/2)/ self.increment)
-        self.end_index = int((self.start_angle - -self.obstacle_range/2)/ self.increment)
-
-    def check 
-
-
-
-
-
-
 class Switches(Node):
 
     def __init__(self):
@@ -50,9 +30,10 @@ class Switches(Node):
         self.end_angle = self.obstacle_range/2
 
         self.lidar_msg = LaserScan()
+        self.lidar_msg.ranges = np.zeros(180).tolist()
 
 
-        self.get_logger().info("Current lock status \n Autonomous: {0} \n Manual: {1}".format(self.autonomous_lock, self.manual_lock))
+        self.get_logger().info("Current lock status \n Autonomous: {0} \n Manual: {1}".format(self.autonomous_lock,  self.manual_lock))
         
         self.joy_subscriber = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
         self.lidar_subscriber = self.create_subscription(LaserScan, '/scan', self.scan_callback, 10)
@@ -73,7 +54,7 @@ class Switches(Node):
         self.start_index = int((self.start_angle - -self.obstacle_range/2)/ self.increment)
         self.end_index = int((self.start_angle - -self.obstacle_range/2)/ self.increment)
 
-        min_value = np.min(self.data[self.start_index, self.end_index])
+        min_value = np.min(self.data[self.start_index:self.end_index])
 
         if min_value > 0 and  min_value <= 5:
             self.lidar_trigger  = True
