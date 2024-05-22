@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import rclpy
+import numpy as np
 
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Odometry
@@ -13,7 +14,8 @@ from rclpy.node import Node
 
 from std_msgs.msg import Float64MultiArray
 
-import numpy as np
+from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener 
 
 BUTTON_TRIANGLE = 2
 BUTTON_SQUARE = 3
@@ -33,7 +35,6 @@ class WaypointManager(Node):
         self.robot_pose, self.robot_position = self.create_pose(x= 0.0,y= 0.0,w= 1.0,z= 0.0)
 
         self.joy_subscriber = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
-        self.odom_subscriber = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
 
         self.publisher_timer = self.create_timer(0.1, self.publisher_timer_callback)
         
@@ -41,11 +42,25 @@ class WaypointManager(Node):
 
         self.waypoint_publisher = self.create_publisher(Float64MultiArray, '/nav_waypoints', 10)
 
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
+
 
     def recording_timer_callback(self):
 
         if ((self.joy_buttons[BUTTON_SQUARE] != self.joy_buttons_last[BUTTON_SQUARE]) 
             and self.joy_buttons[BUTTON_SQUARE] == 1):
+
+            now = rclpy.time.Time()
+            transform = self.tf_buffer.lookup_transform('map', 'odom', now)
+
+            self.robot_position = [transform.transform.translation.x,
+                                   transform.transform.translation.y]
+            
+            self.robot_pose = self.create_pose(x= transform.transform.translation.x,
+                                               y= transform.transform.translation.y,
+                                               w= transform.transform.rotation.w,
+                                               z= transform.transform.rotation.z)
 
             self.goal_poses.append(self.robot_pose)
             self.goal_waypoints.append(self.robot_position)
@@ -77,7 +92,7 @@ class WaypointManager(Node):
     def create_pose(self, x,y,w,z):
 
         pose = PoseStamped()
-        pose.header.frame_id = 'base_footprint'
+        pose.header.frame_id = '/map'
         pose.header.stamp = self.get_clock().now().to_msg()
         pose.pose.position.x = x
         pose.pose.position.y = y
@@ -139,8 +154,8 @@ def main():
     goal_waypoints = manager.goal_waypoints
     goal_poses = manager.goal_poses
 
-    #navigator.goThroughPoses(goal_poses)
-    navigator.goToPose(goal_poses[0])
+    navigator.goThroughPoses(goal_poses)
+    #navigator.goToPose(goal_poses[0])
 
     i = 0
     while not navigator.isTaskComplete():
