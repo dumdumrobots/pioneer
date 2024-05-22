@@ -26,6 +26,8 @@ class WaypointManager(Node):
 
         super().__init__('waypoint_manager')
 
+        self.navigator = BasicNavigator()
+
         self.joy_buttons = [0,0,0,0,0,0,0,0,0]
         self.joy_buttons_last = [0,0,0,0,0,0,0,0,0]
 
@@ -33,44 +35,129 @@ class WaypointManager(Node):
         self.goal_poses = []
 
         self.robot_pose, self.robot_position = self.create_pose(x= 0.0,y= 0.0,w= 1.0,z= 0.0)
+        self.navigator.setInitialPose(self.robot_pose)
+        self.nav_start = self.navigator.get_clock().now()
+        self.now = self.navigator.get_clock().now()
 
         self.joy_subscriber = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
 
-        self.publisher_timer = self.create_timer(0.1, self.publisher_timer_callback)
-        
-        self.recording_timer = self.create_timer(0.1, self.recording_timer_callback)
-
         self.waypoint_publisher = self.create_publisher(Float64MultiArray, '/nav_waypoints', 10)
+
+        self.waypoint_publisher_timer = self.create_timer(0.1, self.waypoint_publisher_timer_callback)
+        self.navigator_timer = self.create_timer(0.1, self.navigator_timer_callback)
+
+        self.waypoint_manager_states = {
+            0 : "Stand-by",
+            1 : "Recording",
+            2 : "Setup",
+            3 : "Navigating",
+            4 : "End",
+        }
+
+        self.current_state = self.waypoint_manager_states[0]
+
+        self.get_logger().info("Navigator initial {0} state.\n".format(self.current_state))
 
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
 
-    def recording_timer_callback(self):
+    def navigator_timer_callback(self):
 
-        if ((self.joy_buttons[BUTTON_SQUARE] != self.joy_buttons_last[BUTTON_SQUARE]) 
-            and self.joy_buttons[BUTTON_SQUARE] == 1):
+        if self.current_state == "Stand-by":
 
-            now = rclpy.time.Time()
-            transform = self.tf_buffer.lookup_transform('map', 'odom', now)
+            if ((self.joy_buttons[BUTTON_TRIANGLE] != self.joy_buttons_last[BUTTON_TRIANGLE]) 
+                and self.joy_buttons[BUTTON_TRIANGLE] == 1):
 
-            self.robot_position = [transform.transform.translation.x,
-                                   transform.transform.translation.y]
+                self.current_state = self.waypoint_manager_states[1]
+                self.get_logger().info("Opening recording. Changing to {0} state.\n".format(self.current_state))
+
+        elif self.current_state == "Recording":
+
+            if ((self.joy_buttons[BUTTON_TRIANGLE] != self.joy_buttons_last[BUTTON_TRIANGLE]) 
+                and self.joy_buttons[BUTTON_TRIANGLE] == 1):
+
+                if len(self.navigator.goal_waypoints) == 0:
+                    self.create_default_exploration()
+                    self.get_logger().info("Waypoint[] empty. Creating default exploration sequence.\n")
+
+                self.current_state = self.waypoint_manager_states[2]
+                self.get_logger().info("Closing recording. Changing to {0} state.\n".format(self.current_state))
+
+
+            if ((self.joy_buttons[BUTTON_SQUARE] != self.joy_buttons_last[BUTTON_SQUARE]) 
+                and self.joy_buttons[BUTTON_SQUARE] == 1):
+
+                now = rclpy.time.Time()
+                transform = self.tf_buffer.lookup_transform('map', 'odom', now)
+
+                self.robot_position = [transform.transform.translation.x,
+                                    transform.transform.translation.y]
+                
+                self.robot_pose = self.create_pose(x= transform.transform.translation.x,
+                                                y= transform.transform.translation.y,
+                                                w= transform.transform.rotation.w,
+                                                z= transform.transform.rotation.z)
+
+                self.goal_poses.append(self.robot_pose)
+                self.goal_waypoints.append(self.robot_position)
+
+                self.get_logger().info("Saved {0} Waypoint.".format(self.robot_position))
+
+        elif self.current_state == 'Setup':
+
+            self.nav_start = self.navigator.get_clock().now()
+            self.navigator.followWaypoints(self.goal_poses)
+
+            self.current_state = self.waypoint_manager_states[3]
+            self.get_logger().info("Changing to {0} state.\n".format(self.current_state))
+
+        
+        elif self.current_state == 'Navigating':
             
-            self.robot_pose = self.create_pose(x= transform.transform.translation.x,
-                                               y= transform.transform.translation.y,
-                                               w= transform.transform.rotation.w,
-                                               z= transform.transform.rotation.z)
+            if self.navigator.isTaskComplete() == False:
+                feedback = self.navigator.getFeedback()
 
-            self.goal_poses.append(self.robot_pose)
-            self.goal_waypoints.append(self.robot_position)
+                'Executing current waypoint: '
+                + str(feedback.current_waypoint + 1)
+                + '/'
+                + str(len(self.goal_poses))
 
-            self.get_logger().info("Waypoint Added: {0}".format(self.robot_position))
+            else:
+                self.current_state = self.waypoint_manager_states[4]
+                self.get_logger().info("Task completed. Changing to {0} state.\n".format(self.current_state))
+
+
+            if ((self.joy_buttons[BUTTON_TRIANGLE] != self.joy_buttons_last[BUTTON_TRIANGLE]) 
+                and self.joy_buttons[BUTTON_TRIANGLE] == 1):
+
+                self.navigator.cancelTask()
+                self.current_state = self.waypoint_manager_states[4]
+                self.get_logger().info("Canceling navigation task. Changing to {0} state.\n".format(self.current_state))
+
+                
+        elif self.current_state == 'End':
+
+            result = self.navigator.getResult()
+
+            if result == TaskResult.SUCCEEDED:
+                self.current_state = self.waypoint_manager_states[0]
+                self.get_logger().info("Goal succeeded. Changing to {0} state.\n".format(self.current_state))
+
+            elif result == TaskResult.CANCELED:
+                self.get_logger().info("Goal canceled. Changing to {0} state.\n".format(self.current_state))
+
+            elif result == TaskResult.FAILED:
+                self.get_logger().info("Goal failed. Changing to {0} state.\n".format(self.current_state))
+
+            else:
+                self.get_logger().info("Invalid return status. Changing to {0} state.\n".format(self.current_state))
+
 
         self.joy_buttons_last = self.joy_buttons
 
 
-    def publisher_timer_callback(self):
+    def waypoint_publisher_timer_callback(self):
 
         msg_array = np.array(self.goal_waypoints)
 
@@ -128,73 +215,15 @@ class WaypointManager(Node):
 
 def main():
     rclpy.init()
-
-    navigator = BasicNavigator()
+    
     manager = WaypointManager()
 
-    initial_pose = manager.robot_pose
-    initial_waypoint = manager.robot_position
-    navigator.setInitialPose(initial_pose)
+    rclpy.spin(manager)
 
-    manager.get_logger().info("Recording Waypoints. Press BUTTON_TRIANGLE to close.")
-
-    while manager.joy_buttons[BUTTON_TRIANGLE] == 0:
-        rclpy.spin_once(manager)
-
-    manager.get_logger().info("Closing recording.")
-
-    if len(manager.goal_waypoints) == 0:
-        manager.create_default_exploration()
-        manager.get_logger().info("Waypoint[] empty. Creating default exploration sequence.")
-        rclpy.spin_once(manager)
-
-    else:
-        manager.get_logger().info("Sending Waypoint[] saved: {0}".format(manager.goal_waypoints))
-
-    goal_waypoints = manager.goal_waypoints
-    goal_poses = manager.goal_poses
-
-    navigator.followWaypoints(goal_poses)
-    #navigator.goToPose(goal_poses[0])
-
-    i = 0
-    while not navigator.isTaskComplete():
-
-        rclpy.spin_once(manager)
-
-        i = i + 1
-        feedback = navigator.getFeedback()
-
-        if feedback and i % 5 == 0:
-            print(
-                'Estimated time of arrival: '
-                + '{0:.0f}'.format(
-                    Duration.from_msg(feedback.estimated_time_remaining).nanoseconds
-                    / 1e9
-                )
-                + ' seconds.'
-            )
-
-            # Some navigation timeout to demo cancellation
-            if Duration.from_msg(feedback.navigation_time) > Duration(seconds=600.0):
-                navigator.cancelTask()
-
-    # Do something depending on the return code
-    result = navigator.getResult()
-    if result == TaskResult.SUCCEEDED:
-        print('Goal succeeded!')
-    elif result == TaskResult.CANCELED:
-        print('Goal was canceled!')
-    elif result == TaskResult.FAILED:
-        print('Goal failed!')
-    else:
-        print('Goal has an invalid return status!')
-
-    navigator.lifecycleShutdown()
+    manager.navigator.lifecycleShutdown()
     manager.destroy_node()
 
     exit(0)
-
 
 if __name__ == '__main__':
     main()
