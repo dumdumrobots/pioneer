@@ -51,7 +51,7 @@ class WaypointManager(Node):
         msg = Float64MultiArray()
         msg.data = msg_array.reshape(int(msg_array.size)).tolist()
 
-        self.get_logger().info("Publishing Waypoint Array: {0}".format(msg_array.reshape(int(msg_array.size)).tolist()))
+        #self.get_logger().info("Publishing Waypoint Array: {0}".format(msg_array.reshape(int(msg_array.size)).tolist()))
 
         self.waypoint_publisher.publish(msg)
 

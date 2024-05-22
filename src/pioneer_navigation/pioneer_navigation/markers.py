@@ -41,7 +41,7 @@ class MarkerManager(Node):
 
     def waypoint_callback(self, msg):
         msg_array = np.array(msg.data)
-        self.get_logger().info("Recieved Waypoints {0}".format(msg.data))
+        #self.get_logger().info("Recieved Waypoints {0}".format(msg.data))
         self.waypoints = msg_array.reshape(int(msg_array.size/2), 2).tolist()
             
     def landmark_callback(self, msg):
