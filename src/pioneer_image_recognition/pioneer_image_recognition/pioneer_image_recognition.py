@@ -108,7 +108,6 @@ def detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow):
                                    
                 if coneAlreadyDetected == True:
                     #cone already detected
-                    return "YellowCone"
                     frame = cv2.rectangle(frame, (int(x-w/2), int(y-h/2)), (int(x+w/2), int(y+h/2)), (255,0,0), 2) #blue thin line
                 else:
                     #cone not yet detected
@@ -123,6 +122,7 @@ def detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow):
                                         
                     array_detectedAll_centerXYwh.append([x,y,w,h])
                     array_detectedAll_4points.append(rectRotatedBox4points)
+                    return array_yellow_centerXYwh
                     
             else:
                 frame = cv2.rectangle(frame, (int(x-w/2), int(y-h/2)), (int(x+w/2), int(y+h/2)), (255,0,0), 2) #blue detected yellow area too small (cone too far away)
@@ -183,7 +183,6 @@ def detectTallCones(frame,image_divide_TallCone,lower1_red,upper1_red,lower2_red
                                    
                 if coneAlreadyDetected == True:
                     #cone already detected
-                    return "TallCone"
                     frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(0,255,255),2) #cyan thin line
                 else:
                     #cone not yet detected
@@ -209,13 +208,13 @@ def detectTallCones(frame,image_divide_TallCone,lower1_red,upper1_red,lower2_red
                         
                         (imageh,imagew,imagec) = frame.shape
                         if x>= imagew-10 or x>= 0+10: #make sure that that not a red bin that is cut is detected as tall cone 
-                            return "TallCone"
                             frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(0,255,255),20) #cyan very thick line
                             #add the rectangle to the list
                             array_tallCone_centerXYwh.append([x, y, w, h])
                             array_detectedAll_centerXYwh.append([x, y, w, h])
                             Box4points_tallCone.append(rectRotatedBox4points)                        
                             array_detectedAll_4points.append(rectRotatedBox4points)
+                            return array_tallCone_centerXYwh
                         
        
     #return frame, array_tallCone_centerXYwh, array_detectedAll_centerXYwh, Box4points_tallCone, array_detectedAll_4points
@@ -275,7 +274,6 @@ def detectRedLittleCones(frame,image_divide_redLittleCone,lower1_red,upper1_red,
                                    
                 if coneAlreadyDetected == True:
                     #cone already detected
-                    return "RedLittleCone"
                     frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(255,255,0),2) #green thin line
                 else:
                     #cone not yet detected
@@ -298,13 +296,13 @@ def detectRedLittleCones(frame,image_divide_redLittleCone,lower1_red,upper1_red,
                             
                     if areaMinEnclosingTriangle[0] < 0.5*areaMinEnclosingRectangle[0] and relation_wh_Fits:
                         #rather triangle than rectangle
-                        return "RedLittleCone"
                         frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(255,255,0),20) #green very thick line
                         #add the rectangle to the list
                         array_littleCone_centerXYwh.append([x, y, w, h])
                         array_detectedAll_centerXYwh.append([x, y, w, h])
                         Box4points_littleCone.append(rectRotatedBox4points)                        
                         array_detectedAll_4points.append(rectRotatedBox4points)
+                        return array_littleCone_centerXYwh
                         
        
     #return frame, array_littleCone_centerXYwh, array_detectedAll_centerXYwh, Box4points_littleCone, array_detectedAll_4points
@@ -363,7 +361,6 @@ def detectRedBins(frame,image_divide_redBin,lower1_red,upper1_red,lower2_red,upp
                                    
                 if binAlreadyDetected == True:
                     #bin already detected
-                    return "RedBin"
                     frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(255,0,255),2) #magenta thin line
                 else:
                     #bin not yet detected
@@ -377,13 +374,13 @@ def detectRedBins(frame,image_divide_redBin,lower1_red,upper1_red,lower2_red,upp
                     
                     if areaMinEnclosingTriangle[0] > 0.5*areaMinEnclosingRectangle[0]:
                         #rather rectangle than triangle
-                        return "RedBin"
                         frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(255,0,255),20) #magenta very thick line
                         #add the rectangle to the list
                         array_redBins_centerXYwh.append([x, y, w, h])
                         array_detectedAll_centerXYwh.append([x, y, w, h])
                         Box4points_redBins.append(rectRotatedBox4points)                        
                         array_detectedAll_4points.append(rectRotatedBox4points)
+                        return array_redBins_centerXYwh
                         
        
 
@@ -437,24 +434,28 @@ def detectAll(frame):
     objects_detected = []
     
     #detect yellow cones
-    object_ = detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow)
-    if object_:
-        objects_detected.append(object_)
+    yellowCones = detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow)
+    if yellowCones:
+        for yellowCone in yellowCones:
+            objects_detected.append(("yellowCone", yellowCone[2] * yellowCone[3]))
     
     #detect red bins
-    object_ = detectRedBins(frame,image_divide_redBin,lower1_redBin,upper1_redBin,lower2_redBin,upper2_redBin,array_detectedAll_4points, array_detectedAll_centerXYwh)
-    if object_:
-    objects_detected.append(object_)
+    redBins = detectRedBins(frame,image_divide_redBin,lower1_redBin,upper1_redBin,lower2_redBin,upper2_redBin,array_detectedAll_4points, array_detectedAll_centerXYwh)
+    if redBins:
+        for redBin in redBins:
+            objects_detected.append(("redBin", redBin[2] * redBin[3]))
     
     #detectTallCones
-    object_ = detectTallCones(frame,image_divide_TallCone,lower1_TallCone,upper1_TallCone,lower2_TallCone,upper2_TallCone,array_detectedAll_4points, array_detectedAll_centerXYwh)
-    if object_
-    objects_detected.append(object_)
+    tallCones = detectTallCones(frame,image_divide_TallCone,lower1_TallCone,upper1_TallCone,lower2_TallCone,upper2_TallCone,array_detectedAll_4points, array_detectedAll_centerXYwh)
+    if tallCones:
+        for tallCone in tallCones:
+            objects_detected.append(("tallCone", tallCone[2] * tallCone[3]))
     
     # #detect little orange cones
-    object_ = detectRedLittleCones(frame,image_divide_redLittleCone,lower1_littleOrange,upper1_littleOrange,lower2_littleOrange,upper2_littleOrange,array_detectedAll_4points, array_detectedAll_centerXYwh)
-    if object_:
-        objects_detected.append(object_)
+    redCones = detectRedLittleCones(frame,image_divide_redLittleCone,lower1_littleOrange,upper1_littleOrange,lower2_littleOrange,upper2_littleOrange,array_detectedAll_4points, array_detectedAll_centerXYwh)
+    if redCones:
+        for redCone in redCones:
+            objects_detected.append(("redCone", redCone[2] * redCone[3]))
 
     return objects_detected
 
