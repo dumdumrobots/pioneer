@@ -29,7 +29,7 @@ def generate_launch_description():
         package='aria_bringup', 
         executable='aria_bringup',
         name='aria_node',
-        arguments=['-rp', '/dev/ttyUSB0']
+        arguments=['-rp', '/dev/ttyUSB0'],
         remappings=[('/cmd_vel','/cmd_vel_out')]
         )
 
