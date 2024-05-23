@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'pioneer_image_recognition'
+package_name = 'pioneer_rosbags'
 
 setup(
     name=package_name,
@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'pioneer_image_recognition = pioneer_image_recognition.pioneer_image_recognition:main',
+            'pioneer_rosbags = pioneer_rosbags.pioneer_rosbags:main',
         ],
     },
 )
