@@ -137,10 +137,7 @@ class WaypointManager(Node):
             if self.navigator.isTaskComplete() == False:
                 feedback = self.navigator.getFeedback()
 
-                self.get_logger().info("Navigating to {0} waypoint. Estimated time of arrival {1:.f}.\n".format(
-                    self.current_goal_waypoint, Duration.from_msg(feedback.estimated_time_remaining).nanoseconds))
-                
-                self.get_logger().info("Current waypoint {1:.f}.\n".format(
+                self.get_logger().info("Navigating to {0} waypoint. Estimated time of arrival {1:.0f}.\n".format(
                     self.current_goal_waypoint, Duration.from_msg(feedback.estimated_time_remaining).nanoseconds))
 
             else:
@@ -229,13 +226,13 @@ class WaypointManager(Node):
         gp1, gw1 = self.create_pose(x= 2.0, y= 0.0, w= 1.0, z= 0.0)
         self.goal_poses.append(gp1)
         self.goal_waypoints.append(gw1)
-        
-        gp2, gw2 = self.create_pose(x= 2.0, y= 2.0, w= 0.0, z= 1.0)
-        self.goal_poses.append(gp2)
-        self.goal_waypoints.append(gw2)
 
         '''
 
+        gp2, gw2 = self.create_pose(x= 2.0, y= 2.0, w= 0.0, z= 1.0)
+        self.goal_poses.append(gp2)
+        self.goal_waypoints.append(gw2)
+        
         gp3, gw3 = self.create_pose(x= 0.0, y= 2.0, w= 0.0, z= 1.0)
         self.goal_poses.append(gp3)
         self.goal_waypoints.append(gw3)

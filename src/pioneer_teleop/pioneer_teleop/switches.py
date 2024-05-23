@@ -41,7 +41,7 @@ class Switches(Node):
         self.nav_lock_publisher = self.create_publisher(Bool, '/pause_nav', 10)
         self.lidar_lock_publisher = self.create_publisher(Bool, '/stop_all', 10)
 
-        self.cmd_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.cmd_publisher = self.create_publisher(Twist, '/cmd_vel_stop', 10)
 
         self.interlocking_timer = self.create_timer(0.1, self.timer_callback)
 

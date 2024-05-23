@@ -54,7 +54,7 @@ def generate_launch_description():
             launch_arguments={
                 'config_topics': config_topics,
                 'config_locks': config_locks,
-                'cmd_vel_out': '/cmd_vel',
+                'cmd_vel_out': '/cmd_vel_out',
                 }.items(),
             )
     

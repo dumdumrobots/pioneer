@@ -29,12 +29,7 @@ def generate_launch_description():
         'nav2_params.yaml'
         )
     
-    nav_include = GroupAction(
-        actions=[
-
-            SetRemap(src='/cmd_vel',dst='/cmd_vel_nav'),
-
-            IncludeLaunchDescription(
+    nav_launch = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
                     get_package_share_directory('nav2_bringup'), 
                     'launch'),'/navigation_launch.py']),
@@ -43,8 +38,6 @@ def generate_launch_description():
                         'params_file' : nav2_params,
                         }.items(),
                     ),
-        ]
-    )
 
     markers_node = Node(
         package='pioneer_navigation',
@@ -54,5 +47,5 @@ def generate_launch_description():
     return LaunchDescription([
         slam_node,
         markers_node,
-        nav_include,
+        nav_launch,
     ])

@@ -30,6 +30,7 @@ def generate_launch_description():
         executable='aria_bringup',
         name='aria_node',
         arguments=['-rp', '/dev/ttyUSB0']
+        remappings=[('/cmd_vel','/cmd_vel_out')]
         )
 
     ekf_node = Node(
