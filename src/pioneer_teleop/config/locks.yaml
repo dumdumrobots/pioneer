@@ -4,8 +4,7 @@ twist_mux:
       pause_navigation:
         topic   : pause_nav
         timeout : 0.0
-        priority: 100
-
+        priority: 75
       pause_manual:
         topic   : pause_man
         timeout : 0.0

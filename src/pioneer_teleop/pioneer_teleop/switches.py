@@ -37,15 +37,20 @@ class Switches(Node):
         self.joy_subscriber = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
         self.lidar_subscriber = self.create_subscription(LaserScan, '/scan', self.scan_callback, 10)
 
-        self.man_lock_publisher = self.create_publisher(Bool, '/pause_man', 10)
-        self.nav_lock_publisher = self.create_publisher(Bool, '/pause_nav', 10)
+        self.cmd_nav_msg = Twist()
+        self.cmd_joy_msg = Twist()
+
+        self.cmd_nav_subscriber = self.create_subscription(Twist, '/cmd_vel', self.cmd_nav_callback, 10)
+        self.cmd_joy_subscriber = self.create_subscription(Twist, '/cmd_vel_joy', self.cmd_joy_callback, 10)
 
         self.lidar_lock_publisher = self.create_publisher(Bool, '/stop_all', 10)
 
         self.cmd_nav_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.cmd_joy_publisher = self.create_publisher(Twist, '/cmd_vel_joy', 10)
 
-        self.interlocking_timer = self.create_timer(0.1, self.timer_callback)
+        self.cmd_out_publisher = self.create_publisher(Twist, '/cmd_vel_out', 10)
+
+        self.interlocking_timer = self.create_timer(0.01, self.timer_callback)
 
 
     def timer_callback(self):
@@ -80,17 +85,15 @@ class Switches(Node):
         # --- Button Switches
 
         stop_cmd = Twist()
-
-        bool_man = Bool()
-        bool_nav = Bool()
         bool_lidar = Bool()
 
+        bool_lidar.data = self.lidar_lock
 
         if ((self.joy_buttons[BUTTON_CIRCLE] != self.joy_buttons_last[BUTTON_CIRCLE]) 
             and self.joy_buttons[BUTTON_CIRCLE] == 1):
 
             if self.autonomous_lock == False:
-                self.cmd_nav_publisher.publish(stop_cmd)
+                self.stop_robot()
 
             self.autonomous_lock = not self.autonomous_lock
             
@@ -99,28 +102,28 @@ class Switches(Node):
             and self.joy_buttons[BUTTON_CROSS] == 1):
 
             if self.manual_lock == False:
-                self.cmd_joy_publisher.publish(stop_cmd)
+                self.stop_robot()
 
             self.manual_lock = not self.manual_lock
 
         
         if (self.joy_buttons[AXIS_TRIGGER_LEFT] == 0 and self.autonomous_lock == False):
             self.dead_lock = True
-            self.cmd_nav_publisher.publish(stop_cmd)
+            self.stop_robot()
         
         else:
             self.dead_lock = False
 
-        if(self.lidar_lock):
-            self.cmd_nav_publisher.publish(stop_cmd)
             
+        # --- Multiplexer
 
-        bool_nav.data = self.autonomous_lock or self.dead_lock
-        bool_man.data = self.manual_lock
-        bool_lidar.data = self.lidar_lock
-            
-        self.nav_lock_publisher.publish(bool_nav)
-        self.man_lock_publisher.publish(bool_man)
+        if self.manual_lock == False:
+            self.cmd_out_publisher.publish(self.cmd_joy_msg)
+
+        elif self.autonomous_lock == False:
+            if self.dead_lock == False and self.lidar_lock == False:
+                self.cmd_out_publisher.publish(self.cmd_nav_msg)
+
 
         self.lidar_lock_publisher.publish(bool_lidar)        
 
@@ -128,13 +131,21 @@ class Switches(Node):
 
         self.get_logger().info("Locking Status:\nAutonomous: {0} Manual: {1} Deadman: {2} LiDAR: {3}\n".format(
             self.autonomous_lock, self.manual_lock, self.dead_lock, self.lidar_lock))
-
+        
+    def stop_robot(self):
+        self.get_logger().info("Stopping robot.")
 
     def joy_callback(self, msg):
         self.joy_buttons = msg.buttons
 
     def scan_callback(self, msg):
         self.lidar_msg = msg
+
+    def cmd_nav_callback(self, msg):
+        self.cmd_nav_msg = msg
+
+    def cmd_joy_callback(self, msg):
+        self.cmd_joy_msg = msg
 
 
 def main():
