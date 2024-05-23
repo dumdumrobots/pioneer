@@ -24,6 +24,7 @@ class ObjectManager(Node):
 
         self.landmarks = []
         self.numbers = []
+        self.registered_numbers = []
 
         self.possible_landmarks = ["Yellow", "Red"]
         self.possible_numbers = ["0","1","2","3","4","5","6","7","8","9"]
@@ -95,7 +96,7 @@ class ObjectManager(Node):
 
         # --- Append landmarks
 
-        if self.landmark_name in self.possible_landmarks and float(self.landmark_size) >= 10000:
+        if self.landmark_name in self.possible_landmarks and float(self.landmark_size) >= 90000:
 
             self.landmark_position = self.get_object_position()
             close_condition = False
@@ -114,22 +115,13 @@ class ObjectManager(Node):
 
         # --- Append numbers
 
-        if self.number_name in self.possible_numbers and float(self.number_size) >= 5000:
+        if ((self.number_name in self.possible_numbers) and
+            not (self.number_name in self.registered_numbers) and
+            (float(self.number_size) >= 50000)):
 
             self.number_position = self.get_object_position()
             self.numbers.append(self.number_position)
-
-            for existing_number in self.numbers:
-
-                distance = self.calculate_distance(self.number_position,
-                                                  existing_number)
-                
-                if distance <= 1.5:
-                    close_condition = True
-                    break
-
-            if close_condition == False:
-                self.numbers.append(self.number_position)
+            self.registered_numbers.append(self.number_name)
 
         # --- Publish landmarks
 
