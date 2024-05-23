@@ -28,6 +28,9 @@ class WaypointManager(Node):
 
         self.navigator = BasicNavigator()
 
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
+
         self.joy_buttons = [0,0,0,0,0,0,0,0,0]
         self.joy_buttons_last = [0,0,0,0,0,0,0,0,0]
 
@@ -61,10 +64,9 @@ class WaypointManager(Node):
 
         self.current_state = self.waypoint_manager_states[0]
 
-        self.get_logger().info("Enterint Navigator initial {0} state.\n".format(self.current_state))
+        self.get_logger().info("Entering Navigator initial {0} state.\n".format(self.current_state))
 
-        self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self)
+        
 
     def reset_goal_arrays(self):
         self.goal_waypoints = []
@@ -74,7 +76,7 @@ class WaypointManager(Node):
     def get_robot_pose(self):
 
         now = rclpy.time.Time()
-        transform = self.tf_buffer.lookup_transform('map', 'odom', now)
+        transform = self.tf_buffer.lookup_transform("odom", "map", now)
 
         self.robot_position = [transform.transform.translation.x,
                             transform.transform.translation.y]
@@ -88,7 +90,7 @@ class WaypointManager(Node):
 
         string_msg = String()
 
-        msg = f'''Pose: [{self.robot_pose.pose.pose.position.x}, {self.robot_pose.pose.pose.position.y}, {self.robot_pose.pose.pose.position.z}] \n
+        msg = f'''Pose: [{self.robot_pose.pose.position.x}, {self.robot_pose.pose.position.y}, {self.robot_pose.pose.position.z}] \n
                 State: {self.current_state} \n'''
         
         string_msg.data = msg
@@ -97,8 +99,6 @@ class WaypointManager(Node):
 
     def navigator_timer_callback(self):
 
-        self.get_robot_pose()
-        self.publish_overlay_msg()
 
         if self.current_state == "Stand-by":
 
@@ -202,6 +202,8 @@ class WaypointManager(Node):
                 self.current_state = self.waypoint_manager_states[0]
                 self.get_logger().info("Invalid return status. Changing to {0} state.\n".format(self.current_state))
 
+        #self.get_robot_pose()
+        #self.publish_overlay_msg()
 
         self.joy_buttons_last = self.joy_buttons
 
