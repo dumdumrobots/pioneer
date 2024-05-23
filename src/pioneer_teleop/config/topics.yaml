@@ -6,12 +6,7 @@ twist_mux:
         timeout : 0.0
         priority: 50
 
-      emergency:
-        topic   : cmd_vel_stop
-        timeout : 0.0
-        priority: 125
-
       joystick:
         topic   : cmd_vel_joy
         timeout : 0.0
-        priority: 150
+        priority: 125

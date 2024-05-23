@@ -37,7 +37,7 @@ def generate_launch_description():
                     launch_arguments={
                         'params_file' : nav2_params,
                         }.items(),
-                    ),
+                    )
 
     markers_node = Node(
         package='pioneer_navigation',

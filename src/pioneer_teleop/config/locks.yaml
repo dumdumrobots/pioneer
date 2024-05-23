@@ -14,6 +14,6 @@ twist_mux:
       pause_manual:
         topic   : pause_man
         timeout : 0.0
-        priority: 175
+        priority: 150
 
       

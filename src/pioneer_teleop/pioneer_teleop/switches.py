@@ -41,7 +41,7 @@ class Switches(Node):
         self.nav_lock_publisher = self.create_publisher(Bool, '/pause_nav', 10)
         self.lidar_lock_publisher = self.create_publisher(Bool, '/stop_all', 10)
 
-        self.cmd_publisher = self.create_publisher(Twist, '/cmd_vel_stop', 10)
+        self.cmd_publisher = self.create_publisher(Twist, '/cmd_vel_out', 10)
 
         self.interlocking_timer = self.create_timer(0.1, self.timer_callback)
 
@@ -83,16 +83,14 @@ class Switches(Node):
 
         stop_cmd = Twist()
 
-        if (self.joy_buttons[AXIS_TRIGGER_LEFT] == 1 and self.autonomous_lock == False):
-            self.dead_lock = False
-
-        elif self.autonomous_lock == False:
+        if (self.joy_buttons[AXIS_TRIGGER_LEFT] == 0 and self.autonomous_lock == False):
             self.dead_lock = True
             self.cmd_publisher.publish(stop_cmd)
-        else:
-            self.dead_lock = True
 
-        if self.lidar_lock:
+        else:
+            self.dead_lock = False
+
+        if self.lidar_lock or self.manual_lock:
             self.cmd_publisher.publish(stop_cmd)
 
         if ((self.joy_buttons[BUTTON_CIRCLE] != self.joy_buttons_last[BUTTON_CIRCLE]) 
