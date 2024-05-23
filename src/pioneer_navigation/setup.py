@@ -31,6 +31,7 @@ setup(
         'console_scripts': [
             'navigator = pioneer_navigation.navigator:main',
             'markers = pioneer_navigation.markers:main',
+            'objects = pioneer_navigation.objects:main',
         ],
     },
 )
