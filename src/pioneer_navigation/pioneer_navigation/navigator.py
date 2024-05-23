@@ -12,7 +12,7 @@ from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 from rclpy.duration import Duration
 from rclpy.node import Node
 
-from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import Float64MultiArray, String
 
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener 
@@ -46,6 +46,7 @@ class WaypointManager(Node):
         self.joy_subscriber = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
 
         self.waypoint_publisher = self.create_publisher(Float64MultiArray, '/nav_waypoints', 10)
+        self.overlay_publisher = self.create_publisher(String, '/input_text', 10)
 
         self.waypoint_publisher_timer = self.create_timer(0.1, self.waypoint_publisher_timer_callback)
         self.navigator_timer = self.create_timer(0.25, self.navigator_timer_callback)
@@ -70,8 +71,34 @@ class WaypointManager(Node):
         self.goal_poses = []
         self.goal_index = 0
 
+    def get_robot_pose(self):
+
+        now = rclpy.time.Time()
+        transform = self.tf_buffer.lookup_transform('map', 'odom', now)
+
+        self.robot_position = [transform.transform.translation.x,
+                            transform.transform.translation.y]
+        
+        self.robot_pose = self.create_pose(x= transform.transform.translation.x,
+                                           y= transform.transform.translation.y,
+                                           w= transform.transform.rotation.w,
+                                           z= transform.transform.rotation.z)
+        
+    def publish_overlay_msg(self):
+
+        string_msg = String()
+
+        msg = f'''Pose: [{self.robot_pose.pose.pose.position.x}, {self.robot_pose.pose.pose.position.y}, {self.robot_pose.pose.pose.position.z}] \n
+                State: {self.current_state} \n'''
+        
+        string_msg.data = msg
+        self.overlay_publisher.publish(string_msg)
+
 
     def navigator_timer_callback(self):
+
+        self.get_robot_pose()
+        self.publish_overlay_msg()
 
         if self.current_state == "Stand-by":
 
@@ -100,16 +127,7 @@ class WaypointManager(Node):
             if ((self.joy_buttons[BUTTON_SQUARE] != self.joy_buttons_last[BUTTON_SQUARE]) 
                 and self.joy_buttons[BUTTON_SQUARE] == 1):
 
-                now = rclpy.time.Time()
-                transform = self.tf_buffer.lookup_transform('map', 'odom', now)
-
-                self.robot_position = [transform.transform.translation.x,
-                                    transform.transform.translation.y]
-                
-                self.robot_pose = self.create_pose(x= transform.transform.translation.x,
-                                                y= transform.transform.translation.y,
-                                                w= transform.transform.rotation.w,
-                                                z= transform.transform.rotation.z)
+                self.get_robot_pose()
 
                 self.goal_poses.append(self.robot_pose)
                 self.goal_waypoints.append(self.robot_position)
@@ -200,11 +218,6 @@ class WaypointManager(Node):
 
     def joy_callback(self, msg):
         self.joy_buttons = msg.buttons
-
-
-    def odom_callback(self, msg):
-        self.robot_pose = msg.pose.pose
-        self.robot_position = [msg.pose.pose.point.x, msg.pose.pose.point.y]
 
 
     def create_pose(self, x,y,w,z):
