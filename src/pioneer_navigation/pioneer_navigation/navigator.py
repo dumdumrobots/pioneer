@@ -202,8 +202,8 @@ class WaypointManager(Node):
                 self.current_state = self.waypoint_manager_states[0]
                 self.get_logger().info("Invalid return status. Changing to {0} state.\n".format(self.current_state))
 
-        #self.get_robot_pose()
-        #self.publish_overlay_msg()
+        self.get_robot_pose()
+        self.publish_overlay_msg()
 
         self.joy_buttons_last = self.joy_buttons
 
