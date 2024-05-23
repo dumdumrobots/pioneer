@@ -88,10 +88,10 @@ class WaypointManager(Node):
         self.robot_position = [transform.transform.translation.x,
                             transform.transform.translation.y]
         
-        self.robot_pose = self.create_pose(x= transform.transform.translation.x,
-                                           y= transform.transform.translation.y,
-                                           w= transform.transform.rotation.w,
-                                           z= transform.transform.rotation.z)
+        self.robot_pose, self.robot_position = self.create_pose(x= transform.transform.translation.x,
+                                                                y= transform.transform.translation.y,
+                                                                w= transform.transform.rotation.w,
+                                                                z= transform.transform.rotation.z)
         
     def publish_overlay_msg(self):
 
@@ -249,8 +249,6 @@ class WaypointManager(Node):
         self.goal_poses.append(gp1)
         self.goal_waypoints.append(gw1)
 
-        '''
-
         gp2, gw2 = self.create_pose(x= 2.0, y= 2.0, w= 0.0, z= 1.0)
         self.goal_poses.append(gp2)
         self.goal_waypoints.append(gw2)
@@ -265,15 +263,33 @@ class WaypointManager(Node):
 
         gp5, gw5 = self.create_pose(x= -2.0, y= 0.0, w= 1.0, z= 0.0)
         self.goal_poses.append(gp5)
-        self.goal_waypoints.append(gw5)   
-        '''     
+        self.goal_waypoints.append(gw5)
 
 
 def main():
     rclpy.init()
     
-    manager = WaypointManager()
+    
     navigator = BasicNavigator()
+    manager = WaypointManager(navigator=navigator)
+
+    # Spin in a separate thread
+    thread = threading.Thread(target=rclpy.spin, args=(manager, ), daemon=True)
+    thread.start()
+
+    rate = manager.create_rate(100)
+
+    try:
+        while rclpy.ok():
+            rate.sleep()
+    except KeyboardInterrupt:
+        pass
+
+    navigator.lifecycleShutdown()
+    manager.destroy_node()
+    thread.join()
+
+    '''
 
     executor = rclpy.executors.MultiThreadedExecutor()
 
@@ -284,6 +300,8 @@ def main():
 
     navigator.lifecycleShutdown()
     manager.destroy_node()
+
+    '''
 
     exit(0)
 
