@@ -16,6 +16,7 @@ from std_msgs.msg import Float64MultiArray, String
 
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener 
+from tf2_ros import TransformException
 
 BUTTON_TRIANGLE = 2
 BUTTON_SQUARE = 3
@@ -75,8 +76,13 @@ class WaypointManager(Node):
 
     def get_robot_pose(self):
 
-        now = rclpy.time.Time()
-        transform = self.tf_buffer.lookup_transform("odom", "map", now)
+        try:
+            now = rclpy.time.Time()
+            transform = self.tf_buffer.lookup_transform('map', 'odom', now)
+            
+        except TransformException:
+            self.get_logger().info(f'Could not listen to transform. Defaulting robot position.')
+            return
 
         self.robot_position = [transform.transform.translation.x,
                             transform.transform.translation.y]

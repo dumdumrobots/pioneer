@@ -14,6 +14,7 @@ from std_msgs.msg import Float64MultiArray, String
 
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener 
+from tf2_ros import TransformException
 
 
 class ObjectManager(Node):
@@ -50,9 +51,15 @@ class ObjectManager(Node):
 
 
     def get_object_position(self):
-        now = rclpy.time.Time()
-        transform = self.tf_buffer.lookup_transform('map', 'odom', now)
 
+        try:
+            now = rclpy.time.Time()
+            transform = self.tf_buffer.lookup_transform('map', 'odom', now)
+            
+        except TransformException:
+            self.get_logger().info(f'Could not listen to transform. Defaulting robot position.')
+            return
+        
         x = transform.transform.rotation.x
         y = transform.transform.rotation.y
         z = transform.transform.rotation.z
