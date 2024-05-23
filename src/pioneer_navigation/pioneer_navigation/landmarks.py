@@ -45,7 +45,7 @@ class LandmarkManager(Node):
 
     def landmark_publisher_timer_callback(self):
 
-        if self.landmark_name in self.possible_landmarks and float(self.landmark_size) <= 10000:
+        if self.landmark_name in self.possible_landmarks and float(self.landmark_size) >= 10000:
 
             now = rclpy.time.Time()
             transform = self.tf_buffer.lookup_transform('map', 'odom', now)
