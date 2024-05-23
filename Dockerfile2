@@ -24,6 +24,12 @@ RUN apt-get update \
 # Create ROS-Workspace
 RUN mkdir -p /home/$USERNAME/pioneer_ws/src
 
+RUN mkdir -p /docker_shared/rosbags \
+    && mkdir -p /docker_shared/stopall_images
+
+RUN chmod 777 /docker_shared/rosbags \
+    && chmod 777 /docker_shared/stopall_images
+    
 WORKDIR /home/$USERNAME/pioneer_ws
 
 COPY src src
