@@ -69,7 +69,7 @@ def generate_launch_description():
     return LaunchDescription([
         switches_node,
         teleop_twist_joy,
-        twist_mux_launch,
+        #twist_mux_launch,
         
     ])
 
