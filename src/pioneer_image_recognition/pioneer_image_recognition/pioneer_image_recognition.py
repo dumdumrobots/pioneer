@@ -654,7 +654,7 @@ class Pioneer_Image_Recognition(Node):
         # self.subscription = self.create_subscription(Pose, '/odom', self.pose_cb, 10)
         self.number_publisher = self.create_publisher(String, '/number_recog', 10)
         self.object_publisher = self.create_publisher(String, '/object_recog', 10)
-        #self.image_publisher = self.create_publisher(Image, '/processed_image', 10)
+        self.image_publisher = self.create_publisher(Image, '/processed_image', 10)
         # self.publisher_ = self.create_publisher(Colour, '/colour_recog', 10)
 
 
@@ -672,7 +672,7 @@ class Pioneer_Image_Recognition(Node):
             ros_image = bridge.cv2_to_imgmsg(frame, encoding="bgr8")
             
             for digit in digits:
-                str_msg_msg = "{},{},{}".format(digit[0], digit[1]) # Number, Size
+                str_msg_msg = "{},{}".format(digit[0], digit[1]) # Number, Size
                 str_msg.data = str_msg_msg
                 self.number_publisher.publish(str_msg)
                 self.image_publisher.publish(ros_image)
