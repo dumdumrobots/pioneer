@@ -80,7 +80,7 @@ class Switches(Node):
         else:
             self.lidar_lock  = False
 
-        self.get_logger().info("Minimal LiDAR Value: {0}\n".format(self.lidar_min_value))
+        self.get_logger().info("Minimal LiDAR Value: {0}\n".format(round(self.lidar_min_value,4)))
 
         # --- Button Switches
 
@@ -123,6 +123,8 @@ class Switches(Node):
                     if self.lidar_lock == False:
                         self.cmd_out_publisher.publish(self.cmd_nav_msg)
                         self.get_logger().info("Publish Autonomous.")
+                    else:
+                        self.stop_robot()
 
 
         self.lidar_lock_publisher.publish(bool_lidar)        
