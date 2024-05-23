@@ -17,6 +17,54 @@ import torch.nn.functional as F
 import numpy as np
 
 
+def colourRecognition(frame):
+    # Define color ranges in HSV for red and yellow
+    red_lower1 = np.array([0, 120, 70])
+    red_upper1 = np.array([10, 255, 255])
+    red_lower2 = np.array([170, 120, 70])
+    red_upper2 = np.array([180, 255, 255])
+
+    yellow_lower = np.array([20, 100, 100])
+    yellow_upper = np.array([30, 255, 255])
+
+
+    # Minimum contour area to be considered as a valid ROI
+    min_contour_area = 15000  # Adjust this value based on your requirements
+        
+    # Convert the frame to HSV color space
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    
+    # Create masks for red and yellow colors
+    mask_red1 = cv2.inRange(hsv_frame, red_lower1, red_upper1)
+    mask_red2 = cv2.inRange(hsv_frame, red_lower2, red_upper2)
+    mask_red = cv2.bitwise_or(mask_red1, mask_red2)
+    
+    mask_yellow = cv2.inRange(hsv_frame, yellow_lower, yellow_upper)
+    
+    # Combine the masks
+    mask = cv2.bitwise_or(mask_red, mask_yellow)
+    
+    # Find contours in the mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    for contour in contours:
+        if cv2.contourArea(contour) > min_contour_area:  # Filter out small contours
+            x, y, w, h = cv2.boundingRect(contour)
+            
+            # Determine the color of the contour
+            roi_mask = mask[y:y+h, x:x+w]
+            red_count = cv2.countNonZero(cv2.bitwise_and(roi_mask, mask_red[y:y+h, x:x+w]))
+            yellow_count = cv2.countNonZero(cv2.bitwise_and(roi_mask, mask_yellow[y:y+h, x:x+w]))
+            
+            color_label = "Red" if red_count > yellow_count else "Yellow"
+            
+            # Draw the bounding rectangle and the color label
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+            cv2.putText(frame, color_label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+
+            return color_label, w*h, frame
+        
+
 def computeAreaTriangle(Ax,Ay,Bx,By,Cx,Cy):
     areaOfTriangle = abs( (Bx * Ay - Ax * By) + (Cx * By - Bx * Cy) + (Ax * Cy - Cx * Ay) ) / 2
     return areaOfTriangle
@@ -397,7 +445,7 @@ def detectAll(frame):
 
     ##HSV values
     #yellow
-    lower_yellow = np.array([19,160,150])
+    lower_yellow = np.array([19,190,150])
     upper_yellow = np.array([30,255,255])
 
     #red bins
@@ -639,7 +687,7 @@ class DigitRecogniser:
             predicted_digit, confidence = self.predict_digit(self.preprocess_image(ROI))
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
             cv2.putText(frame, f"Digit: {predicted_digit}, Confidence: {confidence:.2f}%", (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
-            if confidence > 99:
+            if confidence > 98:
                 digits.append((predicted_digit, w * h))
                 
         return digits
@@ -654,8 +702,10 @@ class Pioneer_Image_Recognition(Node):
         # self.subscription = self.create_subscription(Pose, '/odom', self.pose_cb, 10)
         self.number_publisher = self.create_publisher(String, '/number_recog', 10)
         self.object_publisher = self.create_publisher(String, '/object_recog', 10)
+        self.colour_publisher = self.create_publisher(String, '/colour_recog', 10)
         self.image_publisher = self.create_publisher(Image, '/processed_image', 10)
-        # self.publisher_ = self.create_publisher(Colour, '/colour_recog', 10)
+        self.number_image = self.create_publisher(Image, '/number_image', 10)
+        self.colour_image = self.create_publisher(Image, '/colour_image', 10)
 
 
     def image_cb(self, msg):
@@ -675,7 +725,7 @@ class Pioneer_Image_Recognition(Node):
                 str_msg_msg = "{},{}".format(digit[0], digit[1]) # Number, Size
                 str_msg.data = str_msg_msg
                 self.number_publisher.publish(str_msg)
-                self.image_publisher.publish(ros_image)
+                self.number_image.publish(ros_image)
         except Exception:
             pass
         
@@ -688,6 +738,18 @@ class Pioneer_Image_Recognition(Node):
                 str_msg.data = str_msg_msg
                 self.object_publisher.publish(str_msg)
                 self.image_publisher.publish(ros_image)
+        except Exception:
+            pass
+        
+        try:
+            colours, frame = colourRecognition(cv_image)
+            ros_image = bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+            
+            for colour in colours:
+                str_msg_msg = "{},{}".format(colour[0], colour[1])
+                str_msg.data = str_msg_msg
+                self.colour_publisher.publish(str_msg)
+                self.colour_image.publish(ros_image)
         except Exception:
             pass
 

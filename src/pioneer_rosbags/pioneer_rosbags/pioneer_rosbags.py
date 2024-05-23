@@ -27,7 +27,6 @@ class Pioneer_Rosbags(Node):
         self.bridge = CvBridge()
         self.stopped = False
         self.images = []
-        #os.mkdir("/home/ros/pioneer_ws/rosbags/", 0o777)
         self.bag_process = None
         now = datetime.now()
         self.start_time = f"{now.year}-{now.month}-{now.day}_{now.hour}.{now.minute}.{now.second}.{now.microsecond}"
@@ -51,21 +50,12 @@ class Pioneer_Rosbags(Node):
         if msg.data: # Stop All True
             self.stopped = True
             # Save last 5 seconds of images
-            #os.mkdir("/home/ros/pioneer_ws/stopall_images", 0o777)
             for image in self.images:
                 self.image_publisher.publish(image[0])
                 cv2_image = self.bridge.imgmsg_to_cv2(image[0], desired_encoding='passthrough')
                 cv2.imwrite(f"/docker_shared/stopall_images/{image[1]}.jpg", cv2_image)
             self.stop_rosbags()
             
-    """def stopall_test(self):
-        # Save last 5 seconds of images
-        #os.mkdir("/home/ros/pioneer_ws/stopall_images", 0o777)
-        for image in self.images:
-            self.image_publisher.publish(image[0])
-            cv2_image = self.bridge.imgmsg_to_cv2(image[0], desired_encoding='passthrough')
-            cv2.imwrite(f"/home/ros/pioneer_ws/stopall_images/{image[1]}.jpg", cv2_image)
-        self.stop_rosbags()"""
 
     def start_rosbags(self):
         self.bag_process = subprocess.Popen(['ros2', 'bag', 'record', '-o', f'/docker_shared/rosbags/{self.start_time}', '-a'])
