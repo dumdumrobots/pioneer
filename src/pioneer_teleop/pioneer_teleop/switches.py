@@ -42,7 +42,7 @@ class Switches(Node):
 
         self.lidar_lock_publisher = self.create_publisher(Bool, '/stop_all', 10)
 
-        self.cmd_nav_publisher = self.create_publisher(Twist, '/cmd_vel_nav', 10)
+        self.cmd_nav_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.cmd_joy_publisher = self.create_publisher(Twist, '/cmd_vel_joy', 10)
 
         self.interlocking_timer = self.create_timer(0.1, self.timer_callback)
@@ -104,7 +104,7 @@ class Switches(Node):
             self.manual_lock = not self.manual_lock
 
         
-        if (self.joy_buttons[AXIS_TRIGGER_LEFT] == 0 and self.autonomous_lock):
+        if (self.joy_buttons[AXIS_TRIGGER_LEFT] == 0 and self.autonomous_lock == False):
             self.dead_lock = True
             self.cmd_nav_publisher.publish(stop_cmd)
         
@@ -127,7 +127,7 @@ class Switches(Node):
         self.joy_buttons_last = self.joy_buttons
 
         self.get_logger().info("Locking Status:\nAutonomous: {0} Manual: {1} Deadman: {2} LiDAR: {3}\n".format(
-            self.autonomous_lock, self.manual_lock, self.dead_lock, self.lidar_lock))
+            self.autonomous_lock or self.dead_lock, self.manual_lock, self.dead_lock, self.lidar_lock))
 
 
     def joy_callback(self, msg):

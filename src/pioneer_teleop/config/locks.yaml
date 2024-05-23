@@ -6,11 +6,6 @@ twist_mux:
         timeout : 0.0
         priority: 75
 
-      stop_all:
-        topic   : stop_all
-        timeout : 0.0
-        priority: 100
-
       pause_manual:
         topic   : pause_man
         timeout : 0.0
