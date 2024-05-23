@@ -127,7 +127,7 @@ class Switches(Node):
         self.joy_buttons_last = self.joy_buttons
 
         self.get_logger().info("Locking Status:\nAutonomous: {0} Manual: {1} Deadman: {2} LiDAR: {3}\n".format(
-            self.autonomous_lock or self.dead_lock, self.manual_lock, self.dead_lock, self.lidar_lock))
+            self.autonomous_lock, self.manual_lock, self.dead_lock, self.lidar_lock))
 
 
     def joy_callback(self, msg):
