@@ -108,10 +108,10 @@ def detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow):
                                    
                 if coneAlreadyDetected == True:
                     #cone already detected
-                    frame = cv2.rectangle(frame, (int(x-w/2), int(y-h/2)), (int(x+w/2), int(y+h/2)), (255,0,0), 2) #blue thin line
+                    cv2.rectangle(frame, (int(x-w/2), int(y-h/2)), (int(x+w/2), int(y+h/2)), (255,0,0), 2) #blue thin line
                 else:
                     #cone not yet detected
-                    frame = cv2.rectangle(frame, (int(x-w/2), int(y-h/2)), (int(x+w/2), int(y+h/2)), (255,0,0), 20) #blue very thick line
+                    cv2.rectangle(frame, (int(x-w/2), int(y-h/2)), (int(x+w/2), int(y+h/2)), (255,0,0), 20) #blue very thick line
                     
                     rectRotated = cv2.minAreaRect(contour) #bounding rectangle with minimum area around contour
                     rectRotatedBox4points = cv2.boxPoints(rectRotated) #4 points that define rectangle
@@ -126,7 +126,7 @@ def detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow):
                     return array_yellow_centerXYwh, frame
                     
             else:
-                frame = cv2.rectangle(frame, (int(x-w/2), int(y-h/2)), (int(x+w/2), int(y+h/2)), (255,0,0), 2) #blue detected yellow area too small (cone too far away)
+                cv2.rectangle(frame, (int(x-w/2), int(y-h/2)), (int(x+w/2), int(y+h/2)), (255,0,0), 2) #blue detected yellow area too small (cone too far away)
     #return frame, array_yellow_centerXYwh, array_detectedAll_centerXYwh, array_yellow_4points, array_detectedAll_4points
 
 
@@ -168,7 +168,7 @@ def detectTallCones(frame,image_divide_TallCone,lower1_red,upper1_red,lower2_red
             h = widthHeightRectRotated[1]
             rectRotatedBox4points = cv2.boxPoints(rectRotated) #4 points that define rectangle
             rectRotatedBox4points = np.int0(rectRotatedBox4points)
-            frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(0,255,255),2) #cyan = could be an orange object
+            cv2.drawContours(frame,[rectRotatedBox4points],0,(0,255,255),2) #cyan = could be an orange object
 
             if(w*h>boxMinArea):  #cone must be near                  
                 coneAlreadyDetected = False
@@ -184,7 +184,7 @@ def detectTallCones(frame,image_divide_TallCone,lower1_red,upper1_red,lower2_red
                                    
                 if coneAlreadyDetected == True:
                     #cone already detected
-                    frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(0,255,255),2) #cyan thin line
+                    cv2.drawContours(frame,[rectRotatedBox4points],0,(0,255,255),2) #cyan thin line
                 else:
                     #cone not yet detected
                     #check by the contour if it is really a tall cone (rather a rectangle than a triangle)
@@ -209,7 +209,7 @@ def detectTallCones(frame,image_divide_TallCone,lower1_red,upper1_red,lower2_red
                         
                         (imageh,imagew,imagec) = frame.shape
                         if x>= imagew-10 or x>= 0+10: #make sure that that not a red bin that is cut is detected as tall cone 
-                            frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(0,255,255),20) #cyan very thick line
+                            cv2.drawContours(frame,[rectRotatedBox4points],0,(0,255,255),20) #cyan very thick line
                             #add the rectangle to the list
                             array_tallCone_centerXYwh.append([x, y, w, h])
                             array_detectedAll_centerXYwh.append([x, y, w, h])
@@ -259,7 +259,7 @@ def detectRedLittleCones(frame,image_divide_redLittleCone,lower1_red,upper1_red,
             h = widthHeightRectRotated[1]
             rectRotatedBox4points = cv2.boxPoints(rectRotated) #4 points that define rectangle
             rectRotatedBox4points = np.int0(rectRotatedBox4points)
-            frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(255,255,0),2) #olive green = could be an orange object
+            cv2.drawContours(frame,[rectRotatedBox4points],0,(255,255,0),2) #olive green = could be an orange object
 
             if(w*h>boxMinArea):  #cone must be near                  
                 coneAlreadyDetected = False
@@ -275,7 +275,7 @@ def detectRedLittleCones(frame,image_divide_redLittleCone,lower1_red,upper1_red,
                                    
                 if coneAlreadyDetected == True:
                     #cone already detected
-                    frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(255,255,0),2) #green thin line
+                    cv2.drawContours(frame,[rectRotatedBox4points],0,(255,255,0),2) #green thin line
                 else:
                     #cone not yet detected
                     #check by the contour if it is really a cone (rather a triangle than a rectangle)
@@ -297,7 +297,7 @@ def detectRedLittleCones(frame,image_divide_redLittleCone,lower1_red,upper1_red,
                             
                     if areaMinEnclosingTriangle[0] < 0.5*areaMinEnclosingRectangle[0] and relation_wh_Fits:
                         #rather triangle than rectangle
-                        frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(255,255,0),20) #green very thick line
+                        cv2.drawContours(frame,[rectRotatedBox4points],0,(255,255,0),20) #green very thick line
                         #add the rectangle to the list
                         array_littleCone_centerXYwh.append([x, y, w, h])
                         array_detectedAll_centerXYwh.append([x, y, w, h])
@@ -346,7 +346,7 @@ def detectRedBins(frame,image_divide_redBin,lower1_red,upper1_red,lower2_red,upp
             h = widthHeightRectRotated[1]
             rectRotatedBox4points = cv2.boxPoints(rectRotated) #4 points that define rectangle
             rectRotatedBox4points = np.int0(rectRotatedBox4points)
-            frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(255,0,255),2) #magenta = could be an orange object
+            cv2.drawContours(frame,[rectRotatedBox4points],0,(255,0,255),2) #magenta = could be an orange object
 
             if(w*h>boxMinArea):  #bin must be near                  
                 binAlreadyDetected = False
@@ -362,7 +362,7 @@ def detectRedBins(frame,image_divide_redBin,lower1_red,upper1_red,lower2_red,upp
                                    
                 if binAlreadyDetected == True:
                     #bin already detected
-                    frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(255,0,255),2) #magenta thin line
+                    cv2.drawContours(frame,[rectRotatedBox4points],0,(255,0,255),2) #magenta thin line
                 else:
                     #bin not yet detected
                     #check by the contour if it is really a bin (rather a rectangle than a triangle)
@@ -375,7 +375,7 @@ def detectRedBins(frame,image_divide_redBin,lower1_red,upper1_red,lower2_red,upp
                     
                     if areaMinEnclosingTriangle[0] > 0.5*areaMinEnclosingRectangle[0]:
                         #rather rectangle than triangle
-                        frame = cv2.drawContours(frame,[rectRotatedBox4points],0,(255,0,255),20) #magenta very thick line
+                        cv2.drawContours(frame,[rectRotatedBox4points],0,(255,0,255),20) #magenta very thick line
                         #add the rectangle to the list
                         array_redBins_centerXYwh.append([x, y, w, h])
                         array_detectedAll_centerXYwh.append([x, y, w, h])
@@ -390,8 +390,8 @@ def detectAll(frame):
     ##how near should the detected object be?
     #divide the image into areas of equal size, image_divide gives you the number of resulting areas
     #the bigger image_divide, the smaller the image can be and is still detected
-    image_divide_yellow = 256
-    image_divide_redLittleCone = 256
+    image_divide_yellow = 128
+    image_divide_redLittleCone = 64
     image_divide_redBin = 16
     image_divide_TallCone = 64
 
@@ -433,28 +433,40 @@ def detectAll(frame):
     objects_detected = []
     
     #detect yellow cones
-    yellowCones, frame = detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow)
-    if yellowCones:
-        for yellowCone in yellowCones:
-            objects_detected.append(("yellowCone", yellowCone[2] * yellowCone[3]))
+    try:
+        yellowCones, frame = detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow)
+        if yellowCones:
+            for yellowCone in yellowCones:
+                objects_detected.append(("yellowCone", yellowCone[2] * yellowCone[3]))
+    except Exception:
+        pass
     
     #detect red bins
-    redBins, frame = detectRedBins(frame,image_divide_redBin,lower1_redBin,upper1_redBin,lower2_redBin,upper2_redBin,array_detectedAll_4points, array_detectedAll_centerXYwh)
-    if redBins:
-        for redBin in redBins:
-            objects_detected.append(("redBin", redBin[2] * redBin[3]))
+    try:
+        redBins, frame = detectRedBins(frame,image_divide_redBin,lower1_redBin,upper1_redBin,lower2_redBin,upper2_redBin,array_detectedAll_4points, array_detectedAll_centerXYwh)
+        if redBins:
+            for redBin in redBins:
+                objects_detected.append(("redBin", redBin[2] * redBin[3]))
+    except Exception:
+        pass
     
     #detectTallCones
-    tallCones, frame = detectTallCones(frame,image_divide_TallCone,lower1_TallCone,upper1_TallCone,lower2_TallCone,upper2_TallCone,array_detectedAll_4points, array_detectedAll_centerXYwh)
-    if tallCones:
-        for tallCone in tallCones:
-            objects_detected.append(("tallCone", tallCone[2] * tallCone[3]))
+    try:
+        tallCones, frame = detectTallCones(frame,image_divide_TallCone,lower1_TallCone,upper1_TallCone,lower2_TallCone,upper2_TallCone,array_detectedAll_4points, array_detectedAll_centerXYwh)
+        if tallCones:
+            for tallCone in tallCones:
+                objects_detected.append(("tallCone", tallCone[2] * tallCone[3]))
+    except Exception:
+        pass
     
     # #detect little orange cones
-    redCones, frame = detectRedLittleCones(frame,image_divide_redLittleCone,lower1_littleOrange,upper1_littleOrange,lower2_littleOrange,upper2_littleOrange,array_detectedAll_4points, array_detectedAll_centerXYwh)
-    if redCones:
-        for redCone in redCones:
-            objects_detected.append(("redCone", redCone[2] * redCone[3]))
+    try:
+        redCones, frame = detectRedLittleCones(frame,image_divide_redLittleCone,lower1_littleOrange,upper1_littleOrange,lower2_littleOrange,upper2_littleOrange,array_detectedAll_4points, array_detectedAll_centerXYwh)
+        if redCones:
+            for redCone in redCones:
+                objects_detected.append(("redCone", redCone[2] * redCone[3]))
+    except Exception:
+        pass
 
     return objects_detected, frame
 
@@ -630,7 +642,7 @@ class DigitRecogniser:
             if confidence > 99:
                 digits.append((predicted_digit, w * h))
                 
-        return digits, frame
+        return digits
 
 
 class Pioneer_Image_Recognition(Node):
@@ -642,7 +654,7 @@ class Pioneer_Image_Recognition(Node):
         # self.subscription = self.create_subscription(Pose, '/odom', self.pose_cb, 10)
         self.number_publisher = self.create_publisher(String, '/number_recog', 10)
         self.object_publisher = self.create_publisher(String, '/object_recog', 10)
-        self.image_publisher = self.create_publihser(Image, '/processed_image', 10)
+        #self.image_publisher = self.create_publisher(Image, '/processed_image', 10)
         # self.publisher_ = self.create_publisher(Colour, '/colour_recog', 10)
 
 
@@ -655,23 +667,29 @@ class Pioneer_Image_Recognition(Node):
 
         cv_image = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
 
-        digits, image = digit_recogniser.process_frame(cv_image)
-        ros_image = bridge.cv2_to_imgmsg(image, desired_encoding='passthrough')
+        try:
+            digits, frame = digit_recogniser.process_frame(cv_image)
+            ros_image = bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+            
+            for digit in digits:
+                str_msg_msg = "{},{},{}".format(digit[0], digit[1]) # Number, Size
+                str_msg.data = str_msg_msg
+                self.number_publisher.publish(str_msg)
+                self.image_publisher.publish(ros_image)
+        except Exception:
+            pass
         
-        for digit in digits:
-            str_msg_msg = "{},{},{}".format(digit[0], digit[1]) # Number, Size
-            str_msg.data = str_msg_msg
-            self.number_publisher.publish(str_msg)
-            self.image_publisher.publish(ros_image)
-        
-        objects, image = detectAll(cv_image)
-        ros_image = bridge.cv2_to_imgmsg(image, desired_encoding='passthrough')
-        
-        for object_ in objects:
-            str_msg_msg = "{},{}".format(object_[0], object_[1]) # Number, Size
-            str_msg.data = str_msg_msg
-            self.object_publisher.publish(str_msg)
-            self.image_publisher.publish(ros_image)
+        try:
+            objects, frame = detectAll(cv_image)
+            ros_image = bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+            
+            for object_ in objects:
+                str_msg_msg = "{},{}".format(object_[0], object_[1]) # Number, Size
+                str_msg.data = str_msg_msg
+                self.object_publisher.publish(str_msg)
+                self.image_publisher.publish(ros_image)
+        except Exception:
+            pass
 
 
 def main():
