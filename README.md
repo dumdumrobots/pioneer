@@ -1,7 +1,6 @@
 # Pioneer
 Pioneer Robot Repository for UWA Mobile Robots.
 
-<<<<<<< HEAD
 ## Pioneer Setup
 
 ## Docker
@@ -9,7 +8,50 @@ Pioneer Robot Repository for UWA Mobile Robots.
 The project is encapsulated in a Docker Image. To build the image and later run a container, follow these steps:
 
 
+# Image Recognition
+Run the docker image as per below
 
+Run pioneer_bringup - need the camera to be running and publishing to /oak/stereo/image_raw  
+If the topic is different this needs to be changed in ./src/pioneer_image_recognition/pioneer_image_recognition/pioneer_image_recognition.py, line:
+self.subscription = self.create_subscription(Image, '/oak/stereo/image_raw', self.image_cb, 10)
+
+ros2 run pioneer_image_recognition pioneer_image_recognition
+
+in a seperate terminal:
+ros2 topic echo /number_recog
+
+## Potential Issues:
+- Add dependencies to ./src/pioneer_image_recognition/package.xml
+- Dependencies for cv2
+
+# Github
+## Updating your branch to master
+From a up to date branch
+'''bash
+git checkout master
+git pull
+git checkout <branch>
+git rebase master
+git pull
+'''
+
+## Merging your branch with master
+'''bash
+git add .
+git commit -m '<message>'
+git push
+'''
+[On the github](https://github.com/dumdumrobots/pioneer)
+Pull requests tab
+new pull request
+base: master
+compare: <branch>
+create pull request
+Deal with conflicts then merge pull request
+
+
+# Docker
+To run the docker image
 ''' bash
 docker
 docker compose build
@@ -23,10 +65,12 @@ https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
 In order 
 '''bash
 
-'''
+For joy_node run ros2 run joy joy_node in one terminal and ros2 topic echo /joy in another. Pressing buttons and moving sticks can be used to determine at which location they appear in "sensor_msgs/msg/Joy".  
+
+ros2 topic pub -r 1 /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
 
 
-# Pioneer Summary
+# Pioneer Setup Summary
 ## 1. Github
 To allow collaboration on the pioneers and for ease of transfer of work between pioneers.  
 - [x]
@@ -37,17 +81,17 @@ For ease of setup of pioneers each time we work on them.
 
 ## 3. Initial ROS
 Pioneer is set up in the ROS environment, able to get a sim of the pioneer running.
-- []
+- [x]
 
 ## 4. List out functionality and see if package exists
-- [] ARIA https://roblab.org/courses/mobrob/project/general/ariaNode.zip 
+- [x] ARIA https://roblab.org/courses/mobrob/project/general/ariaNode.zip 
 - [x] joy node: https://index.ros.org/p/joy/
-- [] teleop_twist_joy: https://index.ros.org/p/teleop_twist_joy/github-ros2-teleop_twist_joy/ 
+- [x] teleop_twist_joy: https://index.ros.org/p/teleop_twist_joy/github-ros2-teleop_twist_joy/ 
 - [] Phidgets IMU node: http://wiki.ros.org/phidgets_imu (package may not work, use serial number for code on website to program directly)
 - [] Transforms broadcasters for the sensors: http://wiki.ros.org/tf
 - [] Nav stack setup: http://wiki.ros.org/navigation/Tutorials/RobotSetup
-- [] Lidar - Sick Scan xd https://www.sick.com/fr/en/tim781-2174101/p/p594148 (make sure to include transform)
-- [] Camera - DepthAI API: https://docs.luxonis.com/projects/sdk/en/latest/ Code Samples: https://docs.luxonis.com/projects/api/en/latest/tutorials/code_samples/
+- [x] Lidar - Sick Scan xd https://www.sick.com/fr/en/tim781-2174101/p/p594148 (make sure to include transform)
+- [x] Camera - DepthAI API: https://docs.luxonis.com/projects/sdk/en/latest/ Code Samples: https://docs.luxonis.com/projects/api/en/latest/tutorials/code_samples/
 
 ## 5. Graph out the system with nodes, topics and message types
 
@@ -108,4 +152,3 @@ Check If Container Running
 docker ps
 ```
 
->>>>>>> 39d6a94 (ref: Added in ReadMe)

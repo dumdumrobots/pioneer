@@ -2,8 +2,8 @@
 services:
   pioneer:
     build: .
-    image: pioneer_joaquin:latest
-    container_name: pioneer_joaquin
+    image: pioneer:latest
+    container_name: pioneer2
     network_mode: "host"
     user: ros
     privileged: True
