@@ -15,14 +15,17 @@ class MarkerManager(Node):
 
         self.waypoints = []
         self.landmarks = []
+        self.numbers = []
 
         self.waypoint_markers = []
         self.landmark_markers = []
+        self.number_markers = []
 
         self.publish_timer = self.create_timer(0.1, self.publish_timer_callback)
 
         self.waypoint_subscriber = self.create_subscription(Float64MultiArray, '/nav_waypoints', self.waypoint_callback, 10)
-        self.landmakr_subscriber = self.create_subscription(Float64MultiArray, '/image_landmarks', self.landmark_callback, 10)
+        self.landmark_subscriber = self.create_subscription(Float64MultiArray, '/image_landmarks', self.landmark_callback, 10)
+        self.number_subscriber = self.create_subscription(Float64MultiArray, '/image_numbers', self.numbers_callback, 10)
 
         self.markers_publisher = self.create_publisher(MarkerArray, '/markers', 10)
 
@@ -30,9 +33,10 @@ class MarkerManager(Node):
 
         self.waypoint_markers = self.create_marker_array(self.waypoints, type='waypoint')
         self.landmark_markers = self.create_marker_array(self.landmarks, type='landmark')
+        self.number_markers = self.create_marker_array(self.numbers, type='number')
 
         marker_array = MarkerArray()
-        marker_array.markers = self.waypoint_markers + self.landmark_markers
+        marker_array.markers = self.waypoint_markers + self.landmark_markers + self.number_markers
 
         #self.get_logger().info("Publishing Marker Array {0}".format(marker_array.markers))
 
@@ -44,9 +48,16 @@ class MarkerManager(Node):
         #self.get_logger().info("Recieved Waypoints {0}".format(msg.data))
         self.waypoints = msg_array.reshape(int(msg_array.size/2), 2).tolist()
             
+
     def landmark_callback(self, msg):
         msg_array = np.array(msg.data)
         self.landmarks = msg_array.reshape(int(msg_array.size/2), 2).tolist()
+
+
+    def numbers_callback(self, msg):
+        msg_array = np.array(msg.data)
+        self.numbers = msg_array.reshape(int(msg_array.size/2), 2).tolist()
+
 
     def create_marker_msg(self, id, x, y, rgb=[0.0, 1.0, 0.0]):
         marker = Marker()
@@ -84,6 +95,10 @@ class MarkerManager(Node):
             elif type == 'landmark':
                 rgb = [1.0, 0.0, 0.0]
                 marker = self.create_marker_msg(index + 10, value[0], value[1], rgb)
+
+            elif type == 'number':
+                rgb = [0.0, 0.0, 1.0]
+                marker = self.create_marker_msg(index + 20, value[0], value[1], rgb)
 
             msg_array.append(marker)
 

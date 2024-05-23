@@ -52,7 +52,13 @@ def generate_launch_description():
         executable='joint_state_publisher'
     )
 
+    overlay_node = Node(
+        package='pioneer_overlay',
+        executable='pioneer_overlay',
+    )
+
     return LaunchDescription([
+        overlay_node,
         rviz_launch_arg,
         robot_state_publisher,
         joint_state_pub,
