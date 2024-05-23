@@ -122,7 +122,8 @@ def detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow):
                                         
                     array_detectedAll_centerXYwh.append([x,y,w,h])
                     array_detectedAll_4points.append(rectRotatedBox4points)
-                    return array_yellow_centerXYwh
+                    
+                    return array_yellow_centerXYwh, frame
                     
             else:
                 frame = cv2.rectangle(frame, (int(x-w/2), int(y-h/2)), (int(x+w/2), int(y+h/2)), (255,0,0), 2) #blue detected yellow area too small (cone too far away)
@@ -214,7 +215,7 @@ def detectTallCones(frame,image_divide_TallCone,lower1_red,upper1_red,lower2_red
                             array_detectedAll_centerXYwh.append([x, y, w, h])
                             Box4points_tallCone.append(rectRotatedBox4points)                        
                             array_detectedAll_4points.append(rectRotatedBox4points)
-                            return array_tallCone_centerXYwh
+                            return array_tallCone_centerXYwh, frame
                         
        
     #return frame, array_tallCone_centerXYwh, array_detectedAll_centerXYwh, Box4points_tallCone, array_detectedAll_4points
@@ -302,7 +303,7 @@ def detectRedLittleCones(frame,image_divide_redLittleCone,lower1_red,upper1_red,
                         array_detectedAll_centerXYwh.append([x, y, w, h])
                         Box4points_littleCone.append(rectRotatedBox4points)                        
                         array_detectedAll_4points.append(rectRotatedBox4points)
-                        return array_littleCone_centerXYwh
+                        return array_littleCone_centerXYwh, frame
                         
        
     #return frame, array_littleCone_centerXYwh, array_detectedAll_centerXYwh, Box4points_littleCone, array_detectedAll_4points
@@ -380,10 +381,8 @@ def detectRedBins(frame,image_divide_redBin,lower1_red,upper1_red,lower2_red,upp
                         array_detectedAll_centerXYwh.append([x, y, w, h])
                         Box4points_redBins.append(rectRotatedBox4points)                        
                         array_detectedAll_4points.append(rectRotatedBox4points)
-                        return array_redBins_centerXYwh
+                        return array_redBins_centerXYwh, frame
                         
-       
-
 
 def detectAll(frame):
     ### eventually modify these values
@@ -434,30 +433,30 @@ def detectAll(frame):
     objects_detected = []
     
     #detect yellow cones
-    yellowCones = detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow)
+    yellowCones, frame = detectYellowCones(frame,image_divide_yellow,lower_yellow,upper_yellow)
     if yellowCones:
         for yellowCone in yellowCones:
             objects_detected.append(("yellowCone", yellowCone[2] * yellowCone[3]))
     
     #detect red bins
-    redBins = detectRedBins(frame,image_divide_redBin,lower1_redBin,upper1_redBin,lower2_redBin,upper2_redBin,array_detectedAll_4points, array_detectedAll_centerXYwh)
+    redBins, frame = detectRedBins(frame,image_divide_redBin,lower1_redBin,upper1_redBin,lower2_redBin,upper2_redBin,array_detectedAll_4points, array_detectedAll_centerXYwh)
     if redBins:
         for redBin in redBins:
             objects_detected.append(("redBin", redBin[2] * redBin[3]))
     
     #detectTallCones
-    tallCones = detectTallCones(frame,image_divide_TallCone,lower1_TallCone,upper1_TallCone,lower2_TallCone,upper2_TallCone,array_detectedAll_4points, array_detectedAll_centerXYwh)
+    tallCones, frame = detectTallCones(frame,image_divide_TallCone,lower1_TallCone,upper1_TallCone,lower2_TallCone,upper2_TallCone,array_detectedAll_4points, array_detectedAll_centerXYwh)
     if tallCones:
         for tallCone in tallCones:
             objects_detected.append(("tallCone", tallCone[2] * tallCone[3]))
     
     # #detect little orange cones
-    redCones = detectRedLittleCones(frame,image_divide_redLittleCone,lower1_littleOrange,upper1_littleOrange,lower2_littleOrange,upper2_littleOrange,array_detectedAll_4points, array_detectedAll_centerXYwh)
+    redCones, frame = detectRedLittleCones(frame,image_divide_redLittleCone,lower1_littleOrange,upper1_littleOrange,lower2_littleOrange,upper2_littleOrange,array_detectedAll_4points, array_detectedAll_centerXYwh)
     if redCones:
         for redCone in redCones:
             objects_detected.append(("redCone", redCone[2] * redCone[3]))
 
-    return objects_detected
+    return objects_detected, frame
 
 
 class Pioneer(nn.Module):
@@ -626,10 +625,12 @@ class DigitRecogniser:
         for x, y, w, h in digit_ROIs:
             ROI = frame[y:y+h, x:x+w]
             predicted_digit, confidence = self.predict_digit(self.preprocess_image(ROI))
-            if confidence > 95:
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+            cv2.putText(frame, f"Digit: {predicted_digit}, Confidence: {confidence:.2f}%", (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
+            if confidence > 99:
                 digits.append((predicted_digit, w * h))
                 
-        return digits
+        return digits, frame
 
 
 class Pioneer_Image_Recognition(Node):
@@ -639,7 +640,9 @@ class Pioneer_Image_Recognition(Node):
         super().__init__('pioneer_image_recognition')
         self.subscription = self.create_subscription(Image, '/oak/rgb/image_raw', self.image_cb, 10)
         # self.subscription = self.create_subscription(Pose, '/odom', self.pose_cb, 10)
-        self.publisher_ = self.create_publisher(String, '/number_recog', 10)
+        self.number_publisher = self.create_publisher(String, '/number_recog', 10)
+        self.object_publisher = self.create_publisher(String, '/object_recog', 10)
+        self.image_publisher = self.create_publihser(Image, '/processed_image', 10)
         # self.publisher_ = self.create_publisher(Colour, '/colour_recog', 10)
 
 
@@ -652,19 +655,23 @@ class Pioneer_Image_Recognition(Node):
 
         cv_image = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
 
-        digits = digit_recogniser.process_frame(cv_image)
+        digits, image = digit_recogniser.process_frame(cv_image)
+        ros_image = bridge.cv2_to_imgmsg(image, desired_encoding='passthrough')
         
         for digit in digits:
-            str_msg_msg = "{},{}".format(digit[0], digit[1])# Number, Size, Pose
+            str_msg_msg = "{},{},{}".format(digit[0], digit[1]) # Number, Size
             str_msg.data = str_msg_msg
-            self.publisher_.publish(str_msg)
+            self.number_publisher.publish(str_msg)
+            self.image_publisher.publish(ros_image)
         
-        objects = detectAll(cv_image)
+        objects, image = detectAll(cv_image)
+        ros_image = bridge.cv2_to_imgmsg(image, desired_encoding='passthrough')
         
         for object_ in objects:
-            str_msg_msg = "{}".format(object_)# Number, Size, Pose
+            str_msg_msg = "{},{}".format(object_[0], object_[1]) # Number, Size
             str_msg.data = str_msg_msg
-            self.publisher_.publish(str_msg)
+            self.object_publisher.publish(str_msg)
+            self.image_publisher.publish(ros_image)
 
 
 def main():
