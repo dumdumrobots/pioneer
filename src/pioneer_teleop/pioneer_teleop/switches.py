@@ -105,14 +105,6 @@ class Switches(Node):
 
             self.manual_lock = not self.manual_lock
 
-        
-        if (self.joy_buttons[AXIS_TRIGGER_LEFT] == 0 and self.autonomous_lock == False):
-            self.dead_lock = True
-            self.stop_robot()
-        
-        else:
-            self.dead_lock = False
-
             
         # --- Multiplexer
 
@@ -120,10 +112,17 @@ class Switches(Node):
             self.cmd_out_publisher.publish(self.cmd_joy_msg)
             self.get_logger().info("Publish Manual.")
 
-        elif self.autonomous_lock == False:
-            if self.dead_lock == False and self.lidar_lock == False:
-                self.cmd_out_publisher.publish(self.cmd_nav_msg)
-                self.get_logger().info("Publish Autonomous.")
+        else:
+            if self.autonomous_lock == False:
+                if (self.joy_buttons[AXIS_TRIGGER_LEFT] == 0):
+                    self.dead_lock = True
+                    self.stop_robot()
+                else: 
+                    self.dead_lock = False
+                    
+                    if self.lidar_lock == False:
+                        self.cmd_out_publisher.publish(self.cmd_nav_msg)
+                        self.get_logger().info("Publish Autonomous.")
 
 
         self.lidar_lock_publisher.publish(bool_lidar)        
