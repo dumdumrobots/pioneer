@@ -34,7 +34,11 @@ class WaypointManager(Node):
         self.goal_waypoints = []
         self.goal_poses = []
 
+        self.current_goal_pose = [0.0,0.0]
+
         self.robot_pose, self.robot_position = self.create_pose(x= 0.0,y= 0.0,w= 1.0,z= 0.0)
+        self.current_goal_pose = self.robot_pose
+
         self.navigator.setInitialPose(self.robot_pose)
         self.nav_start = self.navigator.get_clock().now()
         self.now = self.navigator.get_clock().now()
@@ -44,7 +48,7 @@ class WaypointManager(Node):
         self.waypoint_publisher = self.create_publisher(Float64MultiArray, '/nav_waypoints', 10)
 
         self.waypoint_publisher_timer = self.create_timer(0.1, self.waypoint_publisher_timer_callback)
-        self.navigator_timer = self.create_timer(0.1, self.navigator_timer_callback)
+        self.navigator_timer = self.create_timer(0.25, self.navigator_timer_callback)
 
         self.waypoint_manager_states = {
             0 : "Stand-by",
@@ -61,16 +65,24 @@ class WaypointManager(Node):
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
 
+    def reset_goal_arrays(self):
+        self.goal_waypoints = []
+        self.goal_poses = []
+        self.goal_index = 0
+
 
     def navigator_timer_callback(self):
 
         if self.current_state == "Stand-by":
+
+            self.reset_goal_arrays()
 
             if ((self.joy_buttons[BUTTON_TRIANGLE] != self.joy_buttons_last[BUTTON_TRIANGLE]) 
                 and self.joy_buttons[BUTTON_TRIANGLE] == 1):
 
                 self.current_state = self.waypoint_manager_states[1]
                 self.get_logger().info("Opening recording. Changing to {0} state.\n".format(self.current_state))
+
 
         elif self.current_state == "Recording":
 
@@ -104,12 +116,19 @@ class WaypointManager(Node):
 
                 self.get_logger().info("Saved {0} Waypoint.".format(self.robot_position))
 
-        elif self.current_state == 'Setup':
 
+        elif self.current_state == 'Setup':
+            
             self.nav_start = self.navigator.get_clock().now()
-            self.navigator.followWaypoints(self.goal_poses)
+
+            self.current_goal_pose = self.goal_poses[self.goal_index]
+            self.current_goal_waypoint = self.goal_poses[self.goal_index]
+
+            self.navigator.goToPose(self.current_goal_pose)
 
             self.current_state = self.waypoint_manager_states[3]
+
+            self.get_logger().info("Set goal waypoint to {0}.\n".format(self.current_goal_waypoint))
             self.get_logger().info("Changing to {0} state.\n".format(self.current_state))
 
         
@@ -118,11 +137,15 @@ class WaypointManager(Node):
             if self.navigator.isTaskComplete() == False:
                 feedback = self.navigator.getFeedback()
 
-                self.get_logger().info("Executing current waypoint: {0} state.\n".format(feedback.current_waypoint + 1, len(self.goal_poses)))
+                self.get_logger().info("Navigating to {0} waypoint. Estimated time of arrival {1:.f}.\n".format(
+                    self.current_goal_waypoint, Duration.from_msg(feedback.estimated_time_remaining).nanoseconds))
+                
+                self.get_logger().info("Current waypoint {1:.f}.\n".format(
+                    self.current_goal_waypoint, Duration.from_msg(feedback.estimated_time_remaining).nanoseconds))
 
             else:
                 self.current_state = self.waypoint_manager_states[4]
-                self.get_logger().info("Task completed. Changing to {0} state.\n".format(self.current_state))
+                self.get_logger().info("Task finished. Changing to {0} state.\n".format(self.current_state))
 
 
             if ((self.joy_buttons[BUTTON_TRIANGLE] != self.joy_buttons_last[BUTTON_TRIANGLE]) 
@@ -138,16 +161,30 @@ class WaypointManager(Node):
             result = self.navigator.getResult()
 
             if result == TaskResult.SUCCEEDED:
-                self.current_state = self.waypoint_manager_states[0]
-                self.get_logger().info("Goal succeeded. Changing to {0} state.\n".format(self.current_state))
+
+                self.goal_index += 1
+
+                try:
+                    self.current_goal_waypoint = self.goal_poses[self.goal_index]
+
+                    self.current_state = self.waypoint_manager_states[2]
+                    self.get_logger().info("{0}/{1} goals succeeded. Changing to {2} state.\n".format(
+                        self.goal_index + 1, len(self.goal_waypoints), self.current_state))
+
+                except IndexError:
+                    self.current_state = self.waypoint_manager_states[0]
+                    self.get_logger().info("All goals succeeded. Starting next navigation. to {0} state.\n".format(self.current_state))
 
             elif result == TaskResult.CANCELED:
+                self.current_state = self.waypoint_manager_states[0]
                 self.get_logger().info("Goal canceled. Changing to {0} state.\n".format(self.current_state))
 
             elif result == TaskResult.FAILED:
+                self.current_state = self.waypoint_manager_states[0]
                 self.get_logger().info("Goal failed. Changing to {0} state.\n".format(self.current_state))
 
             else:
+                self.current_state = self.waypoint_manager_states[0]
                 self.get_logger().info("Invalid return status. Changing to {0} state.\n".format(self.current_state))
 
 
