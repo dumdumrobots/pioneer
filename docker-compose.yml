@@ -1,6 +1,6 @@
 
 services:
-  pioneer:
+  pioneer1:
     build:
       context: .
       args:
@@ -9,10 +9,12 @@ services:
     image: pioneer:latest
     container_name: pioneer
     network_mode: "host"
-
     user: ros
+    privileged: True
     volumes:
       - $PWD/docker_shared:/docker_shared
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
       - /dev:/dev
     environment:
       - DISPLAY
@@ -23,6 +25,7 @@ services:
 
     stdin_open: true # docker run -i
     tty: true        # docker run -t
+
   pioneer2:
     build:
       context: .
