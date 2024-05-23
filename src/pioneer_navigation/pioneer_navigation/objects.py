@@ -82,19 +82,54 @@ class ObjectManager(Node):
         number_msg = msg
         self.number_name, self.number_size = number_msg.data.split(",")
 
+    def calculate_distance(self, position_1, position_2):
+
+        tGC = position_1 - position_2
+        distance = np.sqrt(np.power(tGC[0],2) + np.power(tGC[1],2))
+        
+        return distance 
+
+
 
     def publisher_timer_callback(self):
+
+        # --- Append landmarks
 
         if self.landmark_name in self.possible_landmarks and float(self.landmark_size) >= 10000:
 
             self.landmark_position = self.get_object_position()
-            self.landmarks.append(self.landmark_position)
+            close_condition = False
 
+            for existing_landmark in self.landmarks:
+
+                distance = self.calculate_distance(self.landmark_position,
+                                                  existing_landmark)
+                
+                if distance <= 1.5:
+                    close_condition = True
+                    break
+
+            if close_condition == False:
+                self.landmarks.append(self.landmark_position)
+
+        # --- Append numbers
 
         if self.number_name in self.possible_numbers and float(self.number_size) >= 5000:
 
             self.number_position = self.get_object_position()
             self.numbers.append(self.number_position)
+
+            for existing_number in self.numbers:
+
+                distance = self.calculate_distance(self.number_position,
+                                                  existing_number)
+                
+                if distance <= 1.5:
+                    close_condition = True
+                    break
+
+            if close_condition == False:
+                self.numbers.append(self.number_position)
 
         # --- Publish landmarks
 
