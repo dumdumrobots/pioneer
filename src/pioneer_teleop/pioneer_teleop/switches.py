@@ -71,7 +71,7 @@ class Switches(Node):
 
             for value in self.data[self.start_index:self.end_index]:
                 if value >= 0.05:
-                    valid_array.append(value)
+                    valid_array.append(round(value,4))
 
             self.lidar_min_value = np.min(np.array(valid_array))
 
