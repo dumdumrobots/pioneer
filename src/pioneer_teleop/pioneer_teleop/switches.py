@@ -39,10 +39,11 @@ class Switches(Node):
 
         self.man_lock_publisher = self.create_publisher(Bool, '/pause_man', 10)
         self.nav_lock_publisher = self.create_publisher(Bool, '/pause_nav', 10)
+
         self.lidar_lock_publisher = self.create_publisher(Bool, '/stop_all', 10)
 
-        self.cmd_publisher = self.create_publisher(Twist, '/cmd_vel_out', 10)
         self.cmd_nav_publisher = self.create_publisher(Twist, '/cmd_vel_nav', 10)
+        self.cmd_joy_publisher = self.create_publisher(Twist, '/cmd_vel_joy', 10)
 
         self.interlocking_timer = self.create_timer(0.1, self.timer_callback)
 
@@ -78,45 +79,50 @@ class Switches(Node):
 
         # --- Button Switches
 
+        stop_cmd = Twist()
+
         bool_man = Bool()
         bool_nav = Bool()
         bool_lidar = Bool()
 
-        stop_cmd = Twist()
-
-        if (self.joy_buttons[AXIS_TRIGGER_LEFT] == 0 and self.autonomous_lock == False):
-            self.dead_lock = True
-            self.cmd_nav_publisher.publish(stop_cmd)
-
-        else:
-            self.dead_lock = False
-
-        if self.autonomous_lock:
-            self.cmd_nav_publisher.publish(stop_cmd)
-
-        if self.lidar_lock or self.manual_lock:
-            self.cmd_publisher.publish(stop_cmd)
 
         if ((self.joy_buttons[BUTTON_CIRCLE] != self.joy_buttons_last[BUTTON_CIRCLE]) 
             and self.joy_buttons[BUTTON_CIRCLE] == 1):
 
             if self.autonomous_lock == False:
-                self.cmd_publisher.publish(stop_cmd)
+                self.cmd_nav_publisher.publish(stop_cmd)
 
             self.autonomous_lock = not self.autonomous_lock
             
             
         if ((self.joy_buttons[BUTTON_CROSS] != self.joy_buttons_last[BUTTON_CROSS]) 
             and self.joy_buttons[BUTTON_CROSS] == 1):
+
+            if self.manual_lock == False:
+                self.cmd_joy_publisher.publish(stop_cmd)
+
             self.manual_lock = not self.manual_lock
 
-        bool_nav.data = self.autonomous_lock
+        
+        if (self.joy_buttons[AXIS_TRIGGER_LEFT] == 0 and self.autonomous_lock):
+            self.dead_lock = True
+            self.cmd_nav_publisher.publish(stop_cmd)
+        
+        else:
+            self.dead_lock = False
+
+        if(self.lidar_lock):
+            self.cmd_nav_publisher.publish(stop_cmd)
+            
+
+        bool_nav.data = self.autonomous_lock or self.dead_lock
         bool_man.data = self.manual_lock
         bool_lidar.data = self.lidar_lock
             
         self.nav_lock_publisher.publish(bool_nav)
         self.man_lock_publisher.publish(bool_man)
-        self.lidar_lock_publisher.publish(bool_lidar)
+
+        self.lidar_lock_publisher.publish(bool_lidar)        
 
         self.joy_buttons_last = self.joy_buttons
 
