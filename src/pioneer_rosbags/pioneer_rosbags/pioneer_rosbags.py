@@ -48,9 +48,9 @@ class Pioneer_Rosbags(Node):
             for image in self.images:
                 self.image_publisher.publish(image[0])
                 cv2_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
-                    cv2.imwrite(f"/home/ros/pioneer_ws/stopall_images/{image[1]}.jpg", cv2_image)
+                cv2.imwrite(f"/home/ros/pioneer_ws/stopall_images/{image[1]}.jpg", cv2_image)
             self.stop_rosbags()
-    
+
     def start_rosbags(self):
         self.bag_process = subprocess.Popen(['ros2', 'bag', 'record', '/home/ros/pioneer_ws/rosbags/', '-a'])
 
