@@ -84,7 +84,6 @@ class Switches(Node):
 
         # --- Button Switches
 
-        stop_cmd = Twist()
         bool_lidar = Bool()
 
         bool_lidar.data = self.lidar_lock
@@ -119,10 +118,12 @@ class Switches(Node):
 
         if self.manual_lock == False:
             self.cmd_out_publisher.publish(self.cmd_joy_msg)
+            self.get_logger().info("Publish Manual.")
 
         elif self.autonomous_lock == False:
             if self.dead_lock == False and self.lidar_lock == False:
                 self.cmd_out_publisher.publish(self.cmd_nav_msg)
+                self.get_logger().info("Publish Autonomous.")
 
 
         self.lidar_lock_publisher.publish(bool_lidar)        
@@ -133,6 +134,8 @@ class Switches(Node):
             self.autonomous_lock, self.manual_lock, self.dead_lock, self.lidar_lock))
         
     def stop_robot(self):
+        stop_cmd = Twist()
+        self.cmd_out_publisher.publish(stop_cmd)
         self.get_logger().info("Stopping robot.")
 
     def joy_callback(self, msg):
