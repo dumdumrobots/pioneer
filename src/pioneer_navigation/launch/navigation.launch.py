@@ -21,7 +21,6 @@ def generate_launch_description():
         package='slam_toolbox',
         executable='async_slam_toolbox_node',
         parameters=[pioneer_pkg + '/config/mapping.yaml'],
-        output='screen',
     )
 
     nav2_params = os.path.join(
@@ -30,12 +29,7 @@ def generate_launch_description():
         'nav2_params.yaml'
         )
     
-    nav_include = GroupAction(
-        actions=[
-
-            SetRemap(src='/cmd_vel',dst='/cmd_vel_nav'),
-
-            IncludeLaunchDescription(
+    nav_launch = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
                     get_package_share_directory('nav2_bringup'), 
                     'launch'),'/navigation_launch.py']),
@@ -43,12 +37,15 @@ def generate_launch_description():
                     launch_arguments={
                         'params_file' : nav2_params,
                         }.items(),
-                    ),
-        ]
+                    )
+
+    markers_node = Node(
+        package='pioneer_navigation',
+        executable='markers',
     )
-    
 
     return LaunchDescription([
         slam_node,
-        nav_include,
+        markers_node,
+        nav_launch,
     ])

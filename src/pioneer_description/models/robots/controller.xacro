@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro"  name="robot">
+
+    <gazebo reference="p3at_front_left_wheel">
+        <kp>10000000.0</kp> <!--contact stiffness-->
+        <kd>100.0</kd> <!--damping-->
+    </gazebo>
+
+    <gazebo reference="p3at_front_right_wheel">
+        <kp>10000000.0</kp> <!--contact stiffness-->
+        <kd>100.0</kd> <!--damping-->
+    </gazebo>
+
+    <gazebo reference="p3at_back_left_wheel">
+        <kp>10000000.0</kp> <!--contact stiffness-->
+        <kd>100.0</kd> <!--damping-->
+    </gazebo>
+
+    <gazebo reference="p3at_back_right_wheel">
+        <kp>10000000.0</kp> <!--contact stiffness-->
+        <kd>100.0</kd> <!--damping-->
+    </gazebo>
+
+    <gazebo>
+        <plugin
+            filename="libignition-gazebo-diff-drive-system.so"
+            name="ignition::gazebo::systems::DiffDrive">
+            
+        <left_joint>p3at_front_left_wheel_joint</left_joint>
+        <left_joint>p3at_back_left_wheel_joint</left_joint>
+        <right_joint>p3at_back_right_wheel_joint</right_joint>
+        <right_joint>p3at_front_right_wheel_joint</right_joint>
+        <wheel_separation>0.15</wheel_separation>
+        <wheel_radius>0.1</wheel_radius>
+        <odom_publish_frequency>1</odom_publish_frequency>
+        <topic>cmd_vel</topic>
+        </plugin>
+    </gazebo>
+    
+</robot>
+  
+  
+  
+

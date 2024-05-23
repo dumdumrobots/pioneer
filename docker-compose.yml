@@ -2,13 +2,15 @@
 services:
   pioneer:
     build: .
-    image: pioneer:latest
-    container_name: pioneer
+    image: pioneer_joaquin:latest
+    container_name: pioneer_joaquin
     network_mode: "host"
-
     user: ros
+    privileged: True
     volumes:
       - $PWD/docker_shared:/docker_shared
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
       - /dev:/dev
     environment:
       - DISPLAY

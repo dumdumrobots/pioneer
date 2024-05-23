@@ -29,6 +29,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'navigator = pioneer_navigation.navigator:main',
+            'markers = pioneer_navigation.markers:main',
         ],
     },
 )

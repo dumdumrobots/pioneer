@@ -31,7 +31,7 @@ class IntegralOdometry(Node):
         
         self.cmd_vel_sub = self.create_subscription(
             Twist,
-            '/cmd_vel',
+            '/cmd_vel_out',
             self.cmd_vel_callback,
             10)
         

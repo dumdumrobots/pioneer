@@ -7,14 +7,15 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, GroupAction
+from launch_ros.actions import SetRemap
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import PathJoinSubstitution, TextSubstitution
 
 def generate_launch_description():
 
     pioneer_pkg = get_package_share_directory('pioneer_bringup')
-    robot_localization_file_path = os.path.join(pioneer_pkg, 'config/ekf.yaml')
+    robot_localization_config = os.path.join(pioneer_pkg, 'config/ekf.yaml')
 
 
     lidar_node = Node(
@@ -28,7 +29,8 @@ def generate_launch_description():
         package='aria_bringup', 
         executable='aria_bringup',
         name='aria_node',
-        arguments=['-rp', '/dev/ttyUSB0']
+        arguments=['-rp', '/dev/ttyUSB0'],
+        remappings=[('/cmd_vel','/cmd_vel_out')]
         )
 
     ekf_node = Node(
@@ -36,7 +38,7 @@ def generate_launch_description():
         executable='ekf_node',
         name='ekf_filter_node',
         output='screen',
-        parameters=[robot_localization_file_path])
+        parameters=[robot_localization_config])
     
     int_odom_node = Node(
         package='pioneer_bringup',
@@ -54,53 +56,30 @@ def generate_launch_description():
             get_package_share_directory('phidgets_spatial'), 
             'launch'),'/spatial-launch.py']),
             )
+    
+       
+    camera_include = GroupAction(
+        actions=[
 
-    teleop_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('pioneer_teleop'), 
-            'launch'),'/teleop.launch.py']),
-            )
-    
-    config_topics = os.path.join(
-        get_package_share_directory('pioneer_bringup'),
-        'config',
-        'topics.yaml'
-        )
-    
-    config_locks = os.path.join(
-        get_package_share_directory('pioneer_bringup'),
-        'config',
-        'locks.yaml'
-        )
-    
-    twist_mux_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('twist_mux'), 
-            'launch'),'/twist_mux_launch.py']),
+            SetRemap(src='/robot_description',dst='/camera/robot_description'),
 
-            launch_arguments={
-                'config_topics': config_topics,
-                'config_locks': config_locks,
-                'cmd_vel_out': '/cmd_vel',
-                }.items(),
-            )
-    
-    camera_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('depthai_ros_driver'), 
-            'launch'),'/camera.launch.py']),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory('depthai_ros_driver'), 
+                    'launch'),'/camera.launch.py']),
+                    
+                    launch_arguments={
+                        'use_rviz': 'false',
+                        'parent_frame' : 'camera_link',
+                        }.items(),
+            ),
+        ]
+    )
 
-            launch_arguments={
-                'use_rviz': 'false',
-                }.items(),
-            )
-    
 
     return LaunchDescription([
         imu_launch,
-        teleop_launch,
-        #camera_launch,
-        twist_mux_launch,
+        camera_include,
         int_odom_node,
         lidar_node,
         aria_node,
