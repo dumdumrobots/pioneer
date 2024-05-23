@@ -1,8 +1,35 @@
 
 services:
   pioneer:
-    build: .
+    build:
+      context: .
+      args:
+        - NODE_ENV=local
+      dockerfile: Dockerfile
     image: pioneer:latest
+    container_name: pioneer
+    network_mode: "host"
+
+    user: ros
+    volumes:
+      - $PWD/docker_shared:/docker_shared
+      - /dev:/dev
+    environment:
+      - DISPLAY
+    device_cgroup_rules:
+      - 'c 188:* rw'
+      - 'c 189:* rw'
+      - 'c 13:* rw'
+
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+  pioneer2:
+    build:
+      context: .
+      args:
+        - NODE_ENV=local
+      dockerfile: Dockerfile2
+    image: pioneer2:latest
     container_name: pioneer2
     network_mode: "host"
     user: ros

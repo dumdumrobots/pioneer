@@ -1,2 +1,3 @@
 .venv
 .DS_Store
+docker_shared/
