@@ -14,6 +14,7 @@ from std_msgs.msg import Float64MultiArray, String
 
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener 
+from tf2_ros import TransformException
 
 
 class ObjectManager(Node):
@@ -24,6 +25,7 @@ class ObjectManager(Node):
 
         self.landmarks = []
         self.numbers = []
+        self.registered_numbers = []
 
         self.possible_landmarks = ["Yellow", "Red"]
         self.possible_numbers = ["0","1","2","3","4","5","6","7","8","9"]
@@ -49,9 +51,15 @@ class ObjectManager(Node):
 
 
     def get_object_position(self):
-        now = rclpy.time.Time()
-        transform = self.tf_buffer.lookup_transform('map', 'odom', now)
 
+        try:
+            now = rclpy.time.Time()
+            transform = self.tf_buffer.lookup_transform('map', 'odom', now)
+            
+        except TransformException:
+            self.get_logger().info(f'Could not listen to transform. Defaulting robot position.')
+            return
+        
         x = transform.transform.rotation.x
         y = transform.transform.rotation.y
         z = transform.transform.rotation.z
@@ -82,19 +90,45 @@ class ObjectManager(Node):
         number_msg = msg
         self.number_name, self.number_size = number_msg.data.split(",")
 
+    def calculate_distance(self, position_1, position_2):
+
+        tGC = position_1 - position_2
+        distance = np.sqrt(np.power(tGC[0],2) + np.power(tGC[1],2))
+        
+        return distance 
+
+
 
     def publisher_timer_callback(self):
 
-        if self.landmark_name in self.possible_landmarks and float(self.landmark_size) >= 10000:
+        # --- Append landmarks
+
+        if self.landmark_name in self.possible_landmarks and float(self.landmark_size) >= 90000:
 
             self.landmark_position = self.get_object_position()
-            self.landmarks.append(self.landmark_position)
+            close_condition = False
 
+            for existing_landmark in self.landmarks:
 
-        if self.number_name in self.possible_numbers and float(self.number_size) >= 5000:
+                distance = self.calculate_distance(self.landmark_position,
+                                                  existing_landmark)
+                
+                if distance <= 1.5:
+                    close_condition = True
+                    break
+
+            if close_condition == False:
+                self.landmarks.append(self.landmark_position)
+
+        # --- Append numbers
+
+        if ((self.number_name in self.possible_numbers) and
+            not (self.number_name in self.registered_numbers) and
+            (float(self.number_size) >= 50000)):
 
             self.number_position = self.get_object_position()
             self.numbers.append(self.number_position)
+            self.registered_numbers.append(self.number_name)
 
         # --- Publish landmarks
 
@@ -115,7 +149,7 @@ class ObjectManager(Node):
         self.number_publisher.publish(msg_numbers)
 
 
-    def euler_from_quaternion(x, y, z, w):
+    def euler_from_quaternion(self, x, y, z, w):
 
         t0 = +2.0 * (w * x + y * z)
         t1 = +1.0 - 2.0 * (x * x + y * y)
