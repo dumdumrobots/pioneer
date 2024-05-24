@@ -130,7 +130,7 @@ def generate_launch_description():
         robot_state_publisher,
         joint_state_pub,
         rviz,
-        #robot_steering,
+        robot_steering,
         pioneer_base_fp_link_tf,
         slam_toolbox,
         nav2_launch
