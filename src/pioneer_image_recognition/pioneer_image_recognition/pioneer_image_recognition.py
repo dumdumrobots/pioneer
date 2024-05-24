@@ -11,6 +11,8 @@ import cv2
 import torch
 import torchvision.transforms as transforms
 
+from datetime import datetime
+
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -44,6 +46,8 @@ def colourRecognition(frame):
     # Combine the masks
     mask = cv2.bitwise_or(mask_red, mask_yellow)
     
+    colours = []
+    
     # Find contours in the mask
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
@@ -56,15 +60,19 @@ def colourRecognition(frame):
             red_count = cv2.countNonZero(cv2.bitwise_and(roi_mask, mask_red[y:y+h, x:x+w]))
             yellow_count = cv2.countNonZero(cv2.bitwise_and(roi_mask, mask_yellow[y:y+h, x:x+w]))
             
-            color_label = "Red" if red_count > yellow_count else "Yellow"
+            colour_label = "Red" if red_count > yellow_count else "Yellow"
             
             # Draw the bounding rectangle and the color label
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
-            cv2.putText(frame, color_label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+            cv2.putText(frame, colour_label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+            
+            colours.append((colour_label, w*h))
+            
 
-            return color_label, w*h, frame
+    return colours, frame
         
 
+"""
 def computeAreaTriangle(Ax,Ay,Bx,By,Cx,Cy):
     areaOfTriangle = abs( (Bx * Ay - Ax * By) + (Cx * By - Bx * Cy) + (Ax * Cy - Cx * Ay) ) / 2
     return areaOfTriangle
@@ -517,7 +525,7 @@ def detectAll(frame):
         pass
 
     return objects_detected, frame
-
+"""
 
 class Pioneer(nn.Module):
     def __init__(self):
@@ -696,17 +704,12 @@ class DigitRecogniser:
 class Pioneer_Image_Recognition(Node):
 
     def __init__(self):
-        # self.pose = Pose()
         super().__init__('pioneer_image_recognition')
         self.subscription = self.create_subscription(Image, '/oak/rgb/image_raw', self.image_cb, 10)
-        # self.subscription = self.create_subscription(Pose, '/odom', self.pose_cb, 10)
         self.number_publisher = self.create_publisher(String, '/number_recog', 10)
         self.object_publisher = self.create_publisher(String, '/object_recog', 10)
-        self.colour_publisher = self.create_publisher(String, '/colour_recog', 10)
         self.image_publisher = self.create_publisher(Image, '/processed_image', 10)
-        self.number_image = self.create_publisher(Image, '/number_image', 10)
-        self.colour_image = self.create_publisher(Image, '/colour_image', 10)
-
+        
 
     def image_cb(self, msg):
         self.image = msg.data
@@ -722,13 +725,16 @@ class Pioneer_Image_Recognition(Node):
             ros_image = bridge.cv2_to_imgmsg(frame, encoding="bgr8")
             
             for digit in digits:
+                now = datetime.now()
                 str_msg_msg = "{},{}".format(digit[0], digit[1]) # Number, Size
                 str_msg.data = str_msg_msg
                 self.number_publisher.publish(str_msg)
-                self.number_image.publish(ros_image)
+                self.image_publisher.publish(ros_image)
+                cv2.imwrite(f"/docker_shared/saved_images/{now.year}-{now.month}-{now.day}_{now.hour}.{now.minute}.{now.second}.{now.microsecond}.jpg", cv_image)
         except Exception:
             pass
         
+        """
         try:
             objects, frame = detectAll(cv_image)
             ros_image = bridge.cv2_to_imgmsg(frame, encoding="bgr8")
@@ -740,16 +746,19 @@ class Pioneer_Image_Recognition(Node):
                 self.image_publisher.publish(ros_image)
         except Exception:
             pass
+        """
         
         try:
             colours, frame = colourRecognition(cv_image)
             ros_image = bridge.cv2_to_imgmsg(frame, encoding="bgr8")
             
             for colour in colours:
+                now = datetime.now()
                 str_msg_msg = "{},{}".format(colour[0], colour[1])
                 str_msg.data = str_msg_msg
-                self.colour_publisher.publish(str_msg)
-                self.colour_image.publish(ros_image)
+                self.object_publisher_publisher.publish(str_msg)
+                self.image_publisher.publish(ros_image)
+                cv2.imwrite(f"/docker_shared/saved_images/{now.year}-{now.month}-{now.day}_{now.hour}.{now.minute}.{now.second}.{now.microsecond}.jpg", cv_image)
         except Exception:
             pass
 

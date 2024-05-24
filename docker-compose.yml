@@ -1,6 +1,6 @@
 
 services:
-  pioneer1:
+  pioneer:
     build:
       context: .
       args:
